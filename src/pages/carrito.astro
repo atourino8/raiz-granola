@@ -1,0 +1,130 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Tu cesta — Raíz Granola">
+  <section class="mx-auto max-w-4xl px-5 py-14">
+    <h1 class="font-serif text-4xl font-semibold text-tierra">Tu cesta</h1>
+
+    <div id="cart-empty" class="mt-10 hidden rounded-organic border border-avena/50 bg-white/60 p-12 text-center">
+      <div class="text-6xl">🥣</div>
+      <p class="mt-4 text-lg text-tierra/70">Tu cesta está vacía.</p>
+      <a href="/tienda" class="mt-6 inline-block rounded-full bg-bosque px-7 py-3 font-semibold text-crema hover:bg-musgo">
+        Ir a la tienda
+      </a>
+    </div>
+
+    <div id="cart-content" class="mt-8 hidden gap-8 lg:grid-cols-[1fr_320px]">
+      <div id="cart-items" class="space-y-4"></div>
+
+      <aside class="h-fit rounded-organic border border-avena/50 bg-white/70 p-6 shadow-suave">
+        <h2 class="font-serif text-xl font-semibold text-tierra">Resumen</h2>
+        <div class="mt-4 flex justify-between text-sm text-tierra/70">
+          <span>Subtotal</span>
+          <span id="cart-subtotal">—</span>
+        </div>
+        <div class="mt-2 flex justify-between text-sm text-tierra/70">
+          <span>Envío</span>
+          <span>Se calcula en el pago</span>
+        </div>
+        <div class="mt-4 border-t border-avena/50 pt-4 flex justify-between font-serif text-lg font-semibold text-bosque">
+          <span>Total</span>
+          <span id="cart-total">—</span>
+        </div>
+        <button
+          id="checkout-btn"
+          class="mt-6 w-full rounded-full bg-miel px-6 py-3.5 font-bold text-tierra transition hover:bg-terracota hover:text-crema disabled:opacity-60"
+        >
+          Ir a pagar
+        </button>
+        <p id="checkout-error" class="mt-3 hidden text-sm text-terracota"></p>
+        <p class="mt-3 text-center text-xs text-tierra/50">🔒 Pago seguro con Stripe</p>
+      </aside>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { cart, cartItems, cartTotal, setQty, removeFromCart } from '../lib/cart';
+  import { formatPrice } from '../lib/products';
+
+  const empty = document.getElementById('cart-empty')!;
+  const content = document.getElementById('cart-content')!;
+  const list = document.getElementById('cart-items')!;
+  const subtotalEl = document.getElementById('cart-subtotal')!;
+  const totalEl = document.getElementById('cart-total')!;
+
+  function render() {
+    const items = cartItems();
+    if (items.length === 0) {
+      empty.classList.remove('hidden');
+      content.classList.add('hidden');
+      content.classList.remove('grid');
+      return;
+    }
+    empty.classList.add('hidden');
+    content.classList.remove('hidden');
+    content.classList.add('grid');
+
+    list.innerHTML = items
+      .map(
+        (it) => `
+      <div class="flex items-center gap-4 rounded-2xl border border-avena/50 bg-white/70 p-4">
+        <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-arena text-3xl">${it.emoji}</div>
+        <div class="flex-1">
+          <p class="font-serif font-semibold text-tierra">${it.name}</p>
+          <p class="text-sm text-tierra/60">${formatPrice(it.price)}</p>
+        </div>
+        <div class="flex items-center rounded-full border border-avena/70">
+          <button class="px-3 py-1 text-tierra/70 hover:text-miel" data-dec="${it.slug}">−</button>
+          <span class="w-8 text-center text-sm font-semibold">${it.qty}</span>
+          <button class="px-3 py-1 text-tierra/70 hover:text-miel" data-inc="${it.slug}">+</button>
+        </div>
+        <div class="w-20 text-right font-semibold text-bosque">${formatPrice(it.price * it.qty)}</div>
+        <button class="text-tierra/40 hover:text-terracota" data-del="${it.slug}" aria-label="Eliminar">✕</button>
+      </div>`,
+      )
+      .join('');
+
+    const total = cartTotal.get();
+    subtotalEl.textContent = formatPrice(total);
+    totalEl.textContent = formatPrice(total);
+  }
+
+  list.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const inc = t.getAttribute('data-inc');
+    const dec = t.getAttribute('data-dec');
+    const del = t.getAttribute('data-del');
+    const items = cartItems();
+    if (inc) setQty(inc, (items.find((i) => i.slug === inc)?.qty ?? 1) + 1);
+    if (dec) setQty(dec, (items.find((i) => i.slug === dec)?.qty ?? 1) - 1);
+    if (del) removeFromCart(del);
+  });
+
+  cart.subscribe(render);
+
+  // Checkout con Stripe
+  const btn = document.getElementById('checkout-btn') as HTMLButtonElement;
+  const errEl = document.getElementById('checkout-error')!;
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.textContent = 'Redirigiendo…';
+    errEl.classList.add('hidden');
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cartItems() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
+      window.location.href = data.url;
+    } catch (err) {
+      errEl.textContent = err instanceof Error ? err.message : 'Error inesperado';
+      errEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Ir a pagar';
+    }
+  });
+</script>

@@ -1,0 +1,53 @@
+---
+import type { Product } from '../lib/products';
+import { formatPrice } from '../lib/products';
+
+interface Props {
+  product: Product;
+}
+const { product } = Astro.props;
+---
+
+<article
+  class="group flex flex-col overflow-hidden rounded-organic border border-avena/50 bg-white/70 shadow-suave transition hover:-translate-y-1 hover:shadow-lg"
+>
+  <a href={`/producto/${product.slug}`} class="block">
+    <div
+      class="relative flex h-52 items-center justify-center overflow-hidden"
+      style={`background: radial-gradient(circle at 50% 40%, ${product.color}33, ${product.color}12);`}
+    >
+      <span class="text-7xl transition group-hover:scale-110">{product.emoji}</span>
+      <div class="absolute left-4 top-4 flex flex-wrap gap-1.5">
+        {
+          product.tags.slice(0, 2).map((t) => (
+            <span class="rounded-full bg-crema/90 px-2.5 py-1 text-[11px] font-semibold text-bosque">
+              {t}
+            </span>
+          ))
+        }
+      </div>
+    </div>
+  </a>
+
+  <div class="flex flex-1 flex-col p-5">
+    <h3 class="font-serif text-lg font-semibold text-tierra">
+      <a href={`/producto/${product.slug}`} class="hover:text-miel">{product.name}</a>
+    </h3>
+    <p class="mt-1 text-sm text-tierra/70">{product.tagline}</p>
+    <p class="mt-1 text-xs text-tierra/50">{product.weight}</p>
+
+    <div class="mt-auto flex items-center justify-between pt-4">
+      <span class="font-serif text-lg font-semibold text-bosque">{formatPrice(product.price)}</span>
+      <button
+        class="rounded-full bg-miel px-4 py-2 text-sm font-bold text-tierra transition hover:bg-terracota hover:text-crema"
+        data-add
+        data-slug={product.slug}
+        data-name={product.name}
+        data-price={product.price}
+        data-emoji={product.emoji}
+      >
+        Añadir
+      </button>
+    </div>
+  </div>
+</article>

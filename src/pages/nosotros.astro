@@ -1,0 +1,63 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const pasos = [
+  { n: '01', t: 'Elegimos el grano', d: 'Avena ecológica de productores de proximidad, integral y sin refinar.' },
+  { n: '02', t: 'Mezclamos a mano', d: 'Miel cruda, aceite de coco y frutos secos. Nada de siropes industriales.' },
+  { n: '03', t: 'Horneamos lento', d: 'A baja temperatura y removiendo, para un dorado uniforme y crujiente.' },
+  { n: '04', t: 'Envasamos al momento', d: 'En bolsa compostable, para que llegue a tu casa recién hecha.' },
+];
+---
+
+<Layout title="Nuestra historia — Raíz Granola">
+  <section class="grain relative overflow-hidden">
+    <div class="mx-auto max-w-3xl px-5 py-16 text-center">
+      <span class="text-sm font-semibold uppercase tracking-wide text-miel">Nuestra historia</span>
+      <h1 class="mt-3 font-serif text-4xl font-semibold text-tierra md:text-5xl">
+        Volver a lo esencial
+      </h1>
+      <p class="mt-5 text-lg leading-relaxed text-tierra/75">
+        Raíz nació de una frustración pequeña y cotidiana: no encontrar una granola
+        que supiera de verdad a cereal y fruta, sin media bolsa de azúcar escondida.
+        Así que encendimos el horno de casa y empezamos a probar. Tres años después
+        seguimos horneando en lotes pequeños, con las mismas manos y la misma manía.
+      </p>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-5xl px-5 py-8">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        pasos.map((p) => (
+          <div class="rounded-organic border border-avena/50 bg-white/60 p-6">
+            <span class="font-serif text-3xl font-semibold text-avena">{p.n}</span>
+            <h3 class="mt-2 font-serif text-lg font-semibold text-tierra">{p.t}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-tierra/70">{p.d}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-5xl px-5 py-16">
+    <div class="grid items-center gap-10 rounded-organic bg-arena/60 p-10 md:grid-cols-2">
+      <div class="flex aspect-square items-center justify-center rounded-organic bg-gradient-to-br from-avena to-miel/40">
+        <span class="text-9xl">🌾</span>
+      </div>
+      <div>
+        <h2 class="font-serif text-3xl font-semibold text-tierra">Nuestro compromiso</h2>
+        <p class="mt-4 leading-relaxed text-tierra/75">
+          Ingredientes ecológicos y de temporada, cero azúcares refinados y embalaje
+          100% compostable. Trabajamos con productores locales y donamos el 1% de cada
+          venta a proyectos de agricultura regenerativa.
+        </p>
+        <a
+          href="/tienda"
+          class="mt-6 inline-block rounded-full bg-bosque px-7 py-3.5 font-semibold text-crema transition hover:bg-musgo"
+        >
+          Probar nuestras granolas
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

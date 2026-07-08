@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { products } from '../lib/products';
+---
+
+<Layout title="Tienda — Raíz Granola">
+  <section class="mx-auto max-w-6xl px-5 py-14">
+    <div class="max-w-2xl">
+      <span class="text-sm font-semibold uppercase tracking-wide text-miel">La tienda</span>
+      <h1 class="mt-2 font-serif text-4xl font-semibold text-tierra md:text-5xl">
+        Elige tu granola
+      </h1>
+      <p class="mt-3 text-lg text-tierra/70">
+        Seis recetas horneadas a mano. Todas sin azúcares refinados y en bolsa
+        compostable. ¿No te decides? Prueba la caja degustación.
+      </p>
+    </div>
+
+    <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {products.map((p) => <ProductCard product={p} />)}
+    </div>
+  </section>
+</Layout>

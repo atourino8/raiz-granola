@@ -1,0 +1,42 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-24 border-t border-avena/50 bg-arena/60">
+  <div class="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-4">
+    <div class="md:col-span-2">
+      <a href="/" class="flex items-center gap-2 font-serif text-2xl font-semibold text-bosque">
+        <span class="text-2xl">🌾</span> Raíz<span class="text-miel">Granola</span>
+      </a>
+      <p class="mt-4 max-w-sm text-sm leading-relaxed text-tierra/70">
+        Horneamos granola en pequeños lotes en nuestro obrador, con avena ecológica y
+        sin azúcares refinados. Del campo al horno, y del horno a tu mesa.
+      </p>
+    </div>
+
+    <div>
+      <h3 class="font-serif text-sm font-semibold uppercase tracking-wide text-tierra">Tienda</h3>
+      <ul class="mt-4 space-y-2 text-sm text-tierra/70">
+        <li><a class="hover:text-miel" href="/tienda">Todas las granolas</a></li>
+        <li><a class="hover:text-miel" href="/producto/caja-degustacion">Caja degustación</a></li>
+        <li><a class="hover:text-miel" href="/carrito">Mi cesta</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="font-serif text-sm font-semibold uppercase tracking-wide text-tierra">Nosotros</h3>
+      <ul class="mt-4 space-y-2 text-sm text-tierra/70">
+        <li><a class="hover:text-miel" href="/nosotros">Nuestra historia</a></li>
+        <li><a class="hover:text-miel" href="/cuenta">Mi cuenta</a></li>
+        <li><a class="hover:text-miel" href="mailto:hola@raizgranola.com">Contacto</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-avena/50">
+    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-5 text-xs text-tierra/60 sm:flex-row">
+      <p>© {year} Raíz Granola · Elaborado con avena y paciencia.</p>
+      <p>Envío en 24-48 h · Embalaje 100% compostable</p>
+    </div>
+  </div>
+</footer>

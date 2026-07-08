@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* Configuración CSS-first de Tailwind v4 (reemplaza tailwind.config.mjs) */
+@theme {
+  /* Paleta natural / orgánica → genera bg-*, text-*, border-*, etc. */
+  --color-crema: #faf6ee;
+  --color-arena: #ede3d2;
+  --color-avena: #d9c7a7;
+  --color-miel: #c99a3f;
+  --color-terracota: #b5642f;
+  --color-bosque: #37503b;
+  --color-musgo: #5c7052;
+  --color-tierra: #3a2e24;
+
+  /* Tipografía → font-serif, font-sans */
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "Nunito Sans", system-ui, sans-serif;
+
+  /* Formas → rounded-organic */
+  --radius-organic: 1.75rem;
+
+  /* Sombra → shadow-suave */
+  --shadow-suave: 0 20px 45px -25px rgba(58, 46, 36, 0.45);
+}

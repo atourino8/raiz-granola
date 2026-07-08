@@ -1,0 +1,56 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getStripe, stripeConfigured } from '../../lib/stripe';
+import { db, ensureSchema } from '../../lib/db';
+
+const sessionId = Astro.url.searchParams.get('session_id');
+let paid = false;
+let email = '';
+
+if (sessionId && stripeConfigured) {
+  try {
+    const stripe = getStripe();
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    paid = session.payment_status === 'paid';
+    email = session.customer_details?.email ?? '';
+    if (paid) {
+      await ensureSchema();
+      await db.execute({
+        sql: `UPDATE orders SET status = 'paid' WHERE stripe_session_id = ?`,
+        args: [sessionId],
+      });
+    }
+  } catch (e) {
+    console.error('[exito]', e);
+  }
+}
+---
+
+<Layout title="¡Gracias por tu pedido! — Raíz Granola">
+  <section class="mx-auto max-w-xl px-5 py-20 text-center">
+    <div class="text-7xl">🎉</div>
+    <h1 class="mt-4 font-serif text-4xl font-semibold text-tierra">¡Gracias por tu pedido!</h1>
+    <p class="mt-4 text-lg text-tierra/75">
+      {
+        paid
+          ? 'Tu pago se ha completado. Estamos preparando tu granola con mimo.'
+          : 'Hemos recibido tu pedido. Te confirmaremos el pago por email en unos minutos.'
+      }
+    </p>
+    {email && <p class="mt-2 text-sm text-tierra/60">Confirmación enviada a {email}</p>}
+
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="/tienda" class="rounded-full bg-bosque px-7 py-3.5 font-semibold text-crema transition hover:bg-musgo">
+        Seguir comprando
+      </a>
+      <a href="/cuenta" class="rounded-full border border-bosque/30 px-7 py-3.5 font-semibold text-bosque transition hover:bg-bosque/10">
+        Ver mis pedidos
+      </a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { clearCart } from '../../lib/cart';
+  clearCart();
+</script>

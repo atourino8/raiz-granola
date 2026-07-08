@@ -1,0 +1,124 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { products, getProduct, formatPrice } from '../../lib/products';
+
+const { slug } = Astro.params;
+const product = getProduct(slug!);
+
+if (!product) {
+  return Astro.redirect('/tienda');
+}
+
+const related = products.filter((p) => p.slug !== product.slug).slice(0, 3);
+
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.name,
+  description: product.description,
+  category: 'Granola',
+  offers: {
+    '@type': 'Offer',
+    price: (product.price / 100).toFixed(2),
+    priceCurrency: 'EUR',
+    availability: 'https://schema.org/InStock',
+  },
+};
+---
+
+<Layout title={`${product.name} — Raíz Granola`} description={product.description} jsonLd={productSchema}>
+  <section class="mx-auto max-w-6xl px-5 py-12">
+    <a href="/tienda" class="text-sm font-semibold text-tierra/60 hover:text-miel">← Volver a la tienda</a>
+
+    <div class="mt-6 grid gap-10 md:grid-cols-2">
+      <div
+        class="flex aspect-square items-center justify-center rounded-organic shadow-suave"
+        style={`background: radial-gradient(circle at 50% 40%, ${product.color}33, ${product.color}10);`}
+      >
+        <span class="text-[11rem]">{product.emoji}</span>
+      </div>
+
+      <div>
+        <div class="flex flex-wrap gap-2">
+          {
+            product.tags.map((t) => (
+              <span class="rounded-full bg-bosque/10 px-3 py-1 text-xs font-semibold text-bosque">
+                {t}
+              </span>
+            ))
+          }
+        </div>
+        <h1 class="mt-4 font-serif text-4xl font-semibold text-tierra">{product.name}</h1>
+        <p class="mt-1 text-lg text-tierra/70">{product.tagline}</p>
+        <p class="mt-5 leading-relaxed text-tierra/80">{product.description}</p>
+
+        <div class="mt-6 rounded-2xl border border-avena/50 bg-white/50 p-5">
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-tierra/60">Ingredientes</h3>
+          <p class="mt-2 text-sm text-tierra/80">{product.ingredients.join(' · ')}</p>
+        </div>
+
+        <div class="mt-7 flex items-center gap-5">
+          <span class="font-serif text-3xl font-semibold text-bosque">{formatPrice(product.price)}</span>
+          <span class="text-sm text-tierra/50">{product.weight}</span>
+        </div>
+
+        <div class="mt-5 flex flex-wrap items-center gap-3">
+          <div class="flex items-center rounded-full border border-avena/70">
+            <button class="px-4 py-2 text-lg text-tierra/70 hover:text-miel" data-qty-dec aria-label="Menos">−</button>
+            <input
+              data-qty-input
+              type="number"
+              min="1"
+              value="1"
+              class="w-12 border-0 bg-transparent text-center font-semibold focus:outline-none"
+            />
+            <button class="px-4 py-2 text-lg text-tierra/70 hover:text-miel" data-qty-inc aria-label="Más">+</button>
+          </div>
+          <button
+            class="flex-1 rounded-full bg-miel px-8 py-3.5 font-bold text-tierra transition hover:bg-terracota hover:text-crema"
+            data-add
+            data-slug={product.slug}
+            data-name={product.name}
+            data-price={product.price}
+            data-emoji={product.emoji}
+          >
+            Añadir a la cesta
+          </button>
+        </div>
+
+        <p class="mt-4 text-sm text-tierra/60">🚚 Envío en 24-48 h · Devolución sencilla</p>
+      </div>
+    </div>
+
+    <!-- Relacionados -->
+    <div class="mt-20">
+      <h2 class="font-serif text-2xl font-semibold text-tierra">También te puede gustar</h2>
+      <div class="mt-6 grid gap-4 sm:grid-cols-3">
+        {
+          related.map((p) => (
+            <a
+              href={`/producto/${p.slug}`}
+              class="flex items-center gap-4 rounded-2xl border border-avena/50 bg-white/60 p-4 transition hover:border-miel"
+            >
+              <span class="text-4xl">{p.emoji}</span>
+              <div>
+                <p class="font-serif font-semibold text-tierra">{p.name}</p>
+                <p class="text-sm text-tierra/60">{formatPrice(p.price)}</p>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>('[data-qty-input]');
+  document.querySelector('[data-qty-dec]')?.addEventListener('click', () => {
+    if (input) input.value = String(Math.max(1, Number(input.value) - 1));
+  });
+  document.querySelector('[data-qty-inc]')?.addEventListener('click', () => {
+    if (input) input.value = String(Number(input.value) + 1);
+  });
+</script>

@@ -1,0 +1,56 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+if (Astro.locals.user) return Astro.redirect('/cuenta');
+
+const error = Astro.url.searchParams.get('error');
+const email = Astro.url.searchParams.get('email') ?? '';
+---
+
+<Layout title="Entrar — Raíz Granola">
+  <section class="mx-auto max-w-md px-5 py-16">
+    <div class="rounded-organic border border-avena/50 bg-white/70 p-8 shadow-suave">
+      <h1 class="font-serif text-3xl font-semibold text-tierra">Bienvenida de nuevo</h1>
+      <p class="mt-2 text-sm text-tierra/70">Entra para ver tus pedidos y pagar más rápido.</p>
+
+      {error && <p class="mt-4 rounded-lg bg-terracota/10 px-4 py-2 text-sm text-terracota">{error}</p>}
+
+      <form method="POST" action="/api/auth/login" class="mt-6 space-y-4">
+        <!-- honeypot anti-bot -->
+        <div class="absolute left-[-9999px]" aria-hidden="true">
+          <label for="website">No rellenar</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-tierra" for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            value={email}
+            class="mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-3 focus:border-miel focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-tierra" for="password">Contraseña</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            class="mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-3 focus:border-miel focus:outline-none"
+          />
+        </div>
+        <button class="w-full rounded-full bg-bosque px-6 py-3.5 font-semibold text-crema transition hover:bg-musgo">
+          Entrar
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-tierra/70">
+        ¿No tienes cuenta?
+        <a href="/registro" class="font-semibold text-miel hover:text-terracota">Crea una</a>
+      </p>
+    </div>
+  </section>
+</Layout>

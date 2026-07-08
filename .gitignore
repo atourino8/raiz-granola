@@ -1,0 +1,27 @@
+# build
+dist/
+.output/
+
+# deps
+node_modules/
+
+# astro
+.astro/
+
+# entorno
+.env
+.env.production
+
+# base de datos local
+data/
+*.db
+*.db-journal
+
+# sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# vercel
+.vercel/
+.output/
