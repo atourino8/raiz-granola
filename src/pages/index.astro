@@ -2,17 +2,16 @@
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { getFeaturedProducts } from '../lib/catalog';
-import { getSetting } from '../lib/settings';
+import { getAllSettings } from '../lib/settings';
 
 const featured = await getFeaturedProducts();
-const heroSubtitle = await getSetting('home_hero_subtitle');
-const storyText = await getSetting('home_story_text');
+const s = await getAllSettings();
 
 const valores = [
-  { icon: '🌱', title: 'Ingredientes ecológicos', text: 'Avena de cultivo ecológico y frutos secos de proximidad, sin aditivos ni conservantes.' },
-  { icon: '🔥', title: 'Horneada a fuego lento', text: 'En pequeños lotes en nuestro obrador, para conseguir ese punto crujiente y dorado.' },
-  { icon: '🍯', title: 'Sin azúcares refinados', text: 'Endulzada solo con miel cruda, sirope de dátil o la fruta. Dulzor honesto.' },
-  { icon: '📦', title: 'Embalaje compostable', text: 'Bolsas y cajas 100% compostables. Rico para ti, amable con la tierra.' },
+  { icon: '🌱', title: s.home_valor1_title, text: s.home_valor1_text },
+  { icon: '🔥', title: s.home_valor2_title, text: s.home_valor2_text },
+  { icon: '🍯', title: s.home_valor3_title, text: s.home_valor3_text },
+  { icon: '📦', title: s.home_valor4_title, text: s.home_valor4_text },
 ];
 ---
 
@@ -21,35 +20,41 @@ const valores = [
     <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
       <div>
         <span class="inline-flex items-center gap-2 rounded-full bg-bosque/10 px-4 py-1.5 text-sm font-semibold text-bosque">
-          🌾 Obrador artesanal · Lotes pequeños
+          {s.home_hero_badge}
         </span>
         <h1 class="mt-5 font-serif text-4xl font-semibold leading-tight text-tierra md:text-6xl">
-          Granola horneada<br /><span class="text-miel">a fuego lento</span>
+          {s.home_hero_title_1}<br /><span class="text-miel">{s.home_hero_title_2}</span>
         </h1>
-        <p class="mt-5 max-w-md text-lg leading-relaxed text-tierra/75">{heroSubtitle}</p>
+        <p class="mt-5 max-w-md text-lg leading-relaxed text-tierra/75">{s.home_hero_subtitle}</p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a
             href="/tienda"
             class="rounded-full bg-bosque px-7 py-3.5 font-semibold text-crema shadow-suave transition hover:bg-musgo"
           >
-            Ver la tienda
+            {s.home_hero_cta1}
           </a>
           <a
             href="/producto/caja-degustacion"
             class="rounded-full border border-bosque/30 px-7 py-3.5 font-semibold text-bosque transition hover:bg-bosque/10"
           >
-            Probar la caja degustación
+            {s.home_hero_cta2}
           </a>
         </div>
         <div class="mt-8 flex items-center gap-6 text-sm text-tierra/60">
-          <span>⭐ 4,9/5 · +2.400 desayunos</span>
-          <span>🚚 Envío 24-48 h</span>
+          <span>{s.home_hero_badge2}</span>
+          <span>{s.home_hero_badge3}</span>
         </div>
       </div>
 
       <div class="relative">
-        <div class="mx-auto flex aspect-square max-w-md items-center justify-center rounded-organic bg-gradient-to-br from-avena via-arena to-miel/40 shadow-suave">
-          <span class="text-[10rem] drop-shadow">🥣</span>
+        <div class="mx-auto flex aspect-square max-w-md items-center justify-center overflow-hidden rounded-organic bg-gradient-to-br from-avena via-arena to-miel/40 shadow-suave">
+          {
+            s.home_hero_image ? (
+              <img src={s.home_hero_image} alt="Granola Raíz" class="h-full w-full object-cover" />
+            ) : (
+              <span class="text-[10rem] drop-shadow">🥣</span>
+            )
+          }
         </div>
         <div class="absolute -bottom-4 -left-2 rotate-[-6deg] rounded-2xl bg-white/90 px-4 py-3 text-sm font-semibold text-bosque shadow-suave">
           100% ecológica 🌱
@@ -78,8 +83,8 @@ const valores = [
   <section class="mx-auto max-w-6xl px-5 py-16">
     <div class="flex items-end justify-between">
       <div>
-        <h2 class="font-serif text-3xl font-semibold text-tierra md:text-4xl">Nuestras favoritas</h2>
-        <p class="mt-2 text-tierra/70">Las recetas que más repiten en casa.</p>
+        <h2 class="font-serif text-3xl font-semibold text-tierra md:text-4xl">{s.home_fav_title}</h2>
+        <p class="mt-2 text-tierra/70">{s.home_fav_subtitle}</p>
       </div>
       <a href="/tienda" class="hidden text-sm font-semibold text-miel hover:text-terracota sm:block">
         Ver todas →
@@ -92,17 +97,23 @@ const valores = [
 
   <section class="grain relative overflow-hidden bg-bosque text-crema">
     <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2">
-      <div class="flex aspect-video items-center justify-center rounded-organic bg-musgo/40">
-        <span class="text-8xl">👩‍🍳</span>
+      <div class="flex aspect-video items-center justify-center overflow-hidden rounded-organic bg-musgo/40">
+        {
+          s.home_story_image ? (
+            <img src={s.home_story_image} alt="Nuestro obrador" class="h-full w-full object-cover" />
+          ) : (
+            <span class="text-8xl">👩‍🍳</span>
+          )
+        }
       </div>
       <div>
-        <h2 class="font-serif text-3xl font-semibold md:text-4xl">Empezó en una cocina pequeña</h2>
-        <p class="mt-4 leading-relaxed text-crema/80">{storyText}</p>
+        <h2 class="font-serif text-3xl font-semibold md:text-4xl">{s.home_story_title}</h2>
+        <p class="mt-4 leading-relaxed text-crema/80">{s.home_story_text}</p>
         <a
           href="/nosotros"
           class="mt-6 inline-block rounded-full bg-miel px-6 py-3 font-semibold text-tierra transition hover:bg-crema"
         >
-          Conoce nuestra historia
+          {s.home_story_cta}
         </a>
       </div>
     </div>

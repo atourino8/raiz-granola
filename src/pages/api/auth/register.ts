@@ -3,14 +3,14 @@ import { createUser, createSession, findUserByEmail } from '../../../lib/auth';
 import { isVerifiedAdmin } from '../../../lib/admin';
 import { emailEnabled, sendVerificationEmail } from '../../../lib/email';
 import { createToken } from '../../../lib/tokens';
+import { rateLimit } from '../../../lib/ratelimit';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, cookies, redirect }) => {
+export const POST: APIRoute = async ({ request, cookies, redirect, clientAddress }) => {
   const clean = (v: unknown) => String(v ?? '').replace(/[\x00-\x1F\x7F]+/g, '').trim();
   const data = await request.formData();
 
-  // Honeypot anti-bot
   if (String(data.get('website') ?? '').trim() !== '') {
     return redirect('/cuenta');
   }
@@ -22,6 +22,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const back = (msg: string) =>
     redirect(`/registro?error=${encodeURIComponent(msg)}&email=${encodeURIComponent(email)}`);
 
+  // Anti abuso: máximo 5 registros por IP cada hora.
+  const ip = String(clientAddress || 'unknown');
+  const rl = await rateLimit(`register:${ip}`, 5, 60 * 60 * 1000);
+  if (!rl.allowed) return back('Demasiados registros desde esta conexión. Inténtalo más tarde.');
+
   if (name.length < 2) return back('Escribe tu nombre.');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return back('Email no válido.');
   if (password.length < 8) return back('La contraseña debe tener al menos 8 caracteres.');
@@ -30,8 +35,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return back('Ya existe una cuenta con ese email.');
   }
 
-  // Si Resend está configurado, la cuenta nace SIN verificar (hay que confirmar
-  // el email). Si no lo está (dev), se auto-verifica para no bloquear el flujo.
   const verified = !emailEnabled;
 
   let user;

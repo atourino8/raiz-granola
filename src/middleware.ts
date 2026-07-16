@@ -16,8 +16,25 @@ export const onRequest = defineMiddleware(async (context, next) => {
   h.set('X-Frame-Options', 'SAMEORIGIN');
   h.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   h.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
   if (import.meta.env.PROD) {
     h.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+    // CSP solo en producción (en dev rompería el HMR de Vite).
+    h.set(
+      'Content-Security-Policy',
+      [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "frame-ancestors 'self'",
+        "form-action 'self'",
+        "object-src 'none'",
+        "img-src 'self' data: https:",
+        "style-src 'self' 'unsafe-inline'",
+        "font-src 'self'",
+        "script-src 'self'",
+        "connect-src 'self'",
+      ].join('; '),
+    );
   }
 
   return response;

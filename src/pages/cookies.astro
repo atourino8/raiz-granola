@@ -1,0 +1,45 @@
+---
+import Layout from '../layouts/Layout.astro';
+const actualizado = '16 de julio de 2026';
+---
+
+<Layout title="Política de Cookies — Raíz Granola" description="Qué cookies y almacenamiento usamos en Raíz Granola.">
+  <section class="mx-auto max-w-3xl px-5 py-14 leading-relaxed text-tierra/85">
+    <h1 class="font-serif text-4xl font-semibold text-tierra">Política de Cookies</h1>
+    <p class="mt-2 text-sm text-tierra/60">Última actualización: {actualizado}</p>
+
+    <p class="mt-4">
+      Usamos el mínimo imprescindible de cookies y almacenamiento local para que la tienda
+      funcione. <strong>No usamos cookies de publicidad ni de analítica de terceros.</strong>
+    </p>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">Qué usamos</h2>
+    <div class="mt-4 overflow-hidden rounded-2xl border border-avena/50">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-arena/50 text-tierra/70">
+          <tr><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Finalidad</th><th class="px-4 py-3">Duración</th></tr>
+        </thead>
+        <tbody>
+          <tr class="border-t border-avena/40"><td class="px-4 py-3 font-mono">raiz_session</td><td class="px-4 py-3">Cookie técnica (necesaria)</td><td class="px-4 py-3">Mantener tu sesión iniciada.</td><td class="px-4 py-3">7 días</td></tr>
+          <tr class="border-t border-avena/40"><td class="px-4 py-3 font-mono">raiz_cart</td><td class="px-4 py-3">Almacenamiento local (funcional)</td><td class="px-4 py-3">Recordar los productos de tu cesta.</td><td class="px-4 py-3">Hasta que la vacíes</td></tr>
+          <tr class="border-t border-avena/40"><td class="px-4 py-3 font-mono">raiz_cookie_consent</td><td class="px-4 py-3">Almacenamiento local (funcional)</td><td class="px-4 py-3">Recordar que ya viste el aviso de cookies.</td><td class="px-4 py-3">Persistente</td></tr>
+          <tr class="border-t border-avena/40"><td class="px-4 py-3 font-mono">Stripe</td><td class="px-4 py-3">Terceros (pago)</td><td class="px-4 py-3">Solo durante el pago, en la pasarela de Stripe, para prevención de fraude.</td><td class="px-4 py-3">Según Stripe</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">Fuentes tipográficas</h2>
+    <p class="mt-2">
+      La web carga tipografías de Google Fonts. Al hacerlo, tu navegador contacta con servidores de
+      Google, que puede recibir tu dirección IP. Estamos migrando a fuentes autoalojadas para evitarlo.
+    </p>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">Cómo gestionarlas</h2>
+    <p class="mt-2">
+      Las cookies técnicas son imprescindibles y no pueden desactivarse sin afectar al funcionamiento.
+      Puedes borrar cookies y almacenamiento local desde la configuración de tu navegador en cualquier
+      momento. Más información en nuestra
+      <a class="text-miel hover:text-terracota" href="/privacidad">Política de Privacidad</a>.
+    </p>
+  </section>
+</Layout>

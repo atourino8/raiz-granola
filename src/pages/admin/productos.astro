@@ -60,7 +60,7 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
                 <td class="px-4 py-3">
                   <div class="flex items-center justify-end gap-3">
                     <a href={`/admin/productos?edit=${p.slug}`} class="font-semibold text-miel hover:text-terracota">Editar</a>
-                    <form method="POST" action="/api/admin/product" onsubmit="return confirm('¿Borrar este producto?')">
+                    <form method="POST" action="/api/admin/product" data-confirm="¿Borrar este producto?">
                       <input type="hidden" name="action" value="delete" />
                       <input type="hidden" name="slug" value={p.slug} />
                       <button class="text-tierra/40 hover:text-terracota">Borrar</button>
@@ -151,3 +151,12 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
     </div>
   </section>
 </Layout>
+
+<script>
+  // Confirmación de borrado sin JS inline (compatible con CSP estricta).
+  document.querySelectorAll('form[data-confirm]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      if (!confirm(form.getAttribute('data-confirm') || '¿Seguro?')) e.preventDefault();
+    });
+  });
+</script>

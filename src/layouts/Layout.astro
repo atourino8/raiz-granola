@@ -1,8 +1,16 @@
 ---
 import '../styles/global.css';
+// Fuentes autoalojadas (RGPD): se sirven desde el propio dominio, sin llamar a Google.
+import '@fontsource/fraunces/400.css';
+import '@fontsource/fraunces/500.css';
+import '@fontsource/fraunces/600.css';
+import '@fontsource/nunito-sans/400.css';
+import '@fontsource/nunito-sans/600.css';
+import '@fontsource/nunito-sans/700.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CartScripts from '../components/CartScripts.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 
 interface Props {
   title?: string;
@@ -42,12 +50,6 @@ const storeSchema = {
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Nunito+Sans:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
     <!-- Open Graph -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -64,6 +66,7 @@ const storeSchema = {
     </main>
     <Footer />
     <CartScripts />
+    <CookieBanner />
   </body>
 </html>
 

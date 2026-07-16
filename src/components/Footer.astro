@@ -1,17 +1,16 @@
 ---
+import { getSetting } from '../lib/settings';
 const year = new Date().getFullYear();
+const tagline = await getSetting('footer_tagline');
 ---
 
 <footer class="mt-24 border-t border-avena/50 bg-arena/60">
   <div class="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-4">
-    <div class="md:col-span-2">
+    <div class="md:col-span-1">
       <a href="/" class="flex items-center gap-2 font-serif text-2xl font-semibold text-bosque">
         <span class="text-2xl">🌾</span> Raíz<span class="text-miel">Granola</span>
       </a>
-      <p class="mt-4 max-w-sm text-sm leading-relaxed text-tierra/70">
-        Horneamos granola en pequeños lotes en nuestro obrador, con avena ecológica y
-        sin azúcares refinados. Del campo al horno, y del horno a tu mesa.
-      </p>
+      <p class="mt-4 max-w-sm text-sm leading-relaxed text-tierra/70">{tagline}</p>
     </div>
 
     <div>
@@ -29,6 +28,16 @@ const year = new Date().getFullYear();
         <li><a class="hover:text-miel" href="/nosotros">Nuestra historia</a></li>
         <li><a class="hover:text-miel" href="/cuenta">Mi cuenta</a></li>
         <li><a class="hover:text-miel" href="mailto:hola@raizgranola.com">Contacto</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="font-serif text-sm font-semibold uppercase tracking-wide text-tierra">Legal</h3>
+      <ul class="mt-4 space-y-2 text-sm text-tierra/70">
+        <li><a class="hover:text-miel" href="/privacidad">Privacidad</a></li>
+        <li><a class="hover:text-miel" href="/cookies">Cookies</a></li>
+        <li><a class="hover:text-miel" href="/aviso-legal">Aviso legal</a></li>
+        <li><a class="hover:text-miel" href="/terminos">Términos y condiciones</a></li>
       </ul>
     </div>
   </div>

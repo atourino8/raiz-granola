@@ -107,5 +107,37 @@ const reenviado = Astro.url.searchParams.get('reenviado');
         </div>
       )
     }
+
+    <div class="mt-16 rounded-organic border border-terracota/30 bg-terracota/5 p-6">
+      <h2 class="font-serif text-xl font-semibold text-tierra">Tus datos</h2>
+      <p class="mt-2 text-sm text-tierra/70">
+        Puedes descargar una copia de tus datos o eliminar tu cuenta de forma permanente.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a
+          href="/api/account/export"
+          class="rounded-full border border-bosque/30 px-5 py-2.5 text-sm font-semibold text-bosque transition hover:bg-bosque/10"
+        >
+          Descargar mis datos
+        </a>
+        <form
+          method="POST"
+          action="/api/account/delete"
+          data-confirm="¿Seguro que quieres eliminar tu cuenta? Esta acción no se puede deshacer."
+        >
+          <button class="rounded-full border border-terracota/50 px-5 py-2.5 text-sm font-semibold text-terracota transition hover:bg-terracota hover:text-crema">
+            Eliminar mi cuenta
+          </button>
+        </form>
+      </div>
+    </div>
   </section>
 </Layout>
+
+<script>
+  document.querySelectorAll('form[data-confirm]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      if (!confirm(form.getAttribute('data-confirm') || '¿Seguro?')) e.preventDefault();
+    });
+  });
+</script>

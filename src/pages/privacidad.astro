@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+const actualizado = '16 de julio de 2026';
+---
+
+<Layout title="Política de Privacidad — Raíz Granola" description="Cómo tratamos tus datos personales en Raíz Granola.">
+  <section class="mx-auto max-w-3xl px-5 py-14 leading-relaxed text-tierra/85">
+    <h1 class="font-serif text-4xl font-semibold text-tierra">Política de Privacidad</h1>
+    <p class="mt-2 text-sm text-tierra/60">Última actualización: {actualizado}</p>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">1. Responsable del tratamiento</h2>
+    <p class="mt-2">
+      Titular: <strong>Raíz Granola S.L.</strong> · NIF/CIF: <strong>B00000000</strong> ·
+      Domicilio: <strong>Calle de la Avena 1, 28001 Madrid (España)</strong> · Email de contacto:
+      <a class="text-miel hover:text-terracota" href="mailto:hola@raizgranola.com">hola@raizgranola.com</a>.
+    </p>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">2. Datos que tratamos</h2>
+    <p class="mt-2">
+      Según tu interacción con la web podemos tratar: datos de identificación y contacto
+      (nombre y email), credenciales de acceso (la contraseña se guarda cifrada con hash,
+      nunca en claro), datos de tus pedidos e historial de compra, dirección de envío y
+      facturación, y datos técnicos como la dirección IP y registros de seguridad.
+    </p>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">3. Finalidades y base jurídica</h2>
+    <ul class="mt-2 list-disc space-y-1 pl-6">
+      <li>Gestionar tu cuenta y autenticarte — <em>ejecución de un contrato</em> (art. 6.1.b RGPD).</li>
+      <li>Tramitar y enviar tus pedidos y gestionar pagos — <em>ejecución de un contrato</em>.</li>
+      <li>Enviar emails de verificación y recuperación de contraseña — <em>ejecución de un contrato</em>.</li>
+      <li>Prevenir fraude y abusos (límites de intentos, registros) — <em>interés legítimo</em> (art. 6.1.f).</li>
+      <li>Cumplir obligaciones legales y contables — <em>obligación legal</em> (art. 6.1.c).</li>
+    </ul>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">4. Conservación</h2>
+    <p class="mt-2">
+      Conservamos tus datos mientras tu cuenta esté activa y, tras su cancelación, durante los
+      plazos legales aplicables (por ejemplo, la normativa fiscal y mercantil obliga a conservar
+      las facturas durante los años establecidos). Después se suprimen o anonimizan.
+    </p>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">5. Destinatarios (encargados de tratamiento)</h2>
+    <p class="mt-2">Para prestar el servicio trabajamos con proveedores que actúan como encargados:</p>
+    <ul class="mt-2 list-disc space-y-1 pl-6">
+      <li><strong>Stripe</strong> — procesamiento de pagos.</li>
+      <li><strong>Turso</strong> — base de datos alojada.</li>
+      <li><strong>Vercel</strong> — alojamiento de la aplicación.</li>
+      <li><strong>Resend</strong> — envío de emails transaccionales.</li>
+    </ul>
+    <p class="mt-2">
+      Algunos proveedores pueden tratar datos fuera del Espacio Económico Europeo; en tal caso se
+      aplican garantías adecuadas (cláusulas contractuales tipo de la Comisión Europea u otros
+      mecanismos previstos en el RGPD).
+    </p>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">6. Tus derechos</h2>
+    <p class="mt-2">
+      Puedes ejercer los derechos de acceso, rectificación, supresión, oposición, limitación del
+      tratamiento y portabilidad escribiendo a
+      <a class="text-miel hover:text-terracota" href="mailto:hola@raizgranola.com">hola@raizgranola.com</a>, adjuntando copia
+      de un documento que acredite tu identidad. También puedes retirar tu consentimiento cuando
+      proceda y presentar una reclamación ante la <strong>Agencia Española de Protección de Datos</strong>
+      (<a class="text-miel hover:text-terracota" href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).
+    </p>
+
+    <h2 class="mt-8 font-serif text-2xl font-semibold text-tierra">7. Seguridad</h2>
+    <p class="mt-2">
+      Aplicamos medidas técnicas y organizativas: cifrado en tránsito (HTTPS), contraseñas con
+      hash, cookies de sesión seguras, límites de intentos de acceso y cabeceras de seguridad.
+    </p>
+
+    <p class="mt-8 text-sm text-tierra/60">
+      Consulta también nuestra <a class="text-miel hover:text-terracota" href="/cookies">Política de Cookies</a>
+      y el <a class="text-miel hover:text-terracota" href="/aviso-legal">Aviso Legal</a>.
+    </p>
+  </section>
+</Layout>

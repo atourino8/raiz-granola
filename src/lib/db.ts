@@ -9,7 +9,15 @@ if (url.startsWith('file:')) {
   const filePath = url.slice('file:'.length);
   const dir = dirname(filePath);
   if (dir && dir !== '.') {
-    mkdirSync(dir, { recursive: true });
+    // En serverless (Vercel) el disco es de solo lectura: no debe tumbar la app.
+    try {
+      mkdirSync(dir, { recursive: true });
+    } catch (err) {
+      console.error(
+        '[db] No se pudo crear la carpeta local. En producción, DATABASE_URL debe apuntar a Turso (libsql://...), no a un archivo.',
+        err,
+      );
+    }
   }
 }
 
@@ -76,10 +84,16 @@ export async function ensureSchema(): Promise<void> {
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL DEFAULT ''
       )`,
+      `CREATE TABLE IF NOT EXISTS rate_limits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        key TEXT NOT NULL,
+        ts INTEGER NOT NULL
+      )`,
       `CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)`,
       `CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)`,
       `CREATE INDEX IF NOT EXISTS idx_products_active ON products(active)`,
       `CREATE INDEX IF NOT EXISTS idx_tokens_type ON auth_tokens(type)`,
+      `CREATE INDEX IF NOT EXISTS idx_rate_key ON rate_limits(key, ts)`,
     ],
     'write',
   );

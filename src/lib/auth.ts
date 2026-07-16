@@ -2,8 +2,11 @@ import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import type { AstroCookies } from 'astro';
 import { db, ensureSchema } from './db';
 
-const SESSION_COOKIE = 'raiz_session';
-const SESSION_DAYS = 30;
+// En producción usamos el prefijo __Host- (exige Secure + Path=/ + sin Domain),
+// que impide sobrescribir la cookie desde subdominios. En dev (http) no aplica.
+const SESSION_COOKIE = import.meta.env.PROD ? '__Host-raiz_session' : 'raiz_session';
+// Duración de sesión configurable (por defecto 7 días). Evita "sesión infinita".
+const SESSION_DAYS = Number(import.meta.env.SESSION_DAYS ?? '7') || 7;
 
 export interface User {
   id: number;
@@ -26,6 +29,17 @@ export function verifyPassword(password: string, stored: string): boolean {
   const derived = scryptSync(password, salt, 64);
   const original = Buffer.from(hash, 'hex');
   return original.length === derived.length && timingSafeEqual(original, derived);
+}
+
+// Hash "señuelo" para gastar el mismo tiempo cuando el usuario no existe
+// (mitiga ataques de timing que revelarían qué emails están registrados).
+const DUMMY_HASH = hashPassword('raiz-dummy-password-para-timing');
+export function burnPasswordTime(password: string): void {
+  try {
+    verifyPassword(password, DUMMY_HASH);
+  } catch {
+    /* no-op */
+  }
 }
 
 // ─── Usuarios ───
@@ -73,6 +87,14 @@ export async function updatePassword(userId: number, password: string): Promise<
     sql: 'UPDATE users SET password_hash = ? WHERE id = ?',
     args: [hashPassword(password), userId],
   });
+  // Al cambiar la contraseña, invalidamos TODAS las sesiones del usuario
+  // (mata cualquier sesión robada o antigua).
+  await db.execute({ sql: 'DELETE FROM sessions WHERE user_id = ?', args: [userId] });
+}
+
+export async function deleteAllSessions(userId: number): Promise<void> {
+  await ensureSchema();
+  await db.execute({ sql: 'DELETE FROM sessions WHERE user_id = ?', args: [userId] });
 }
 
 // ─── Sesiones ───

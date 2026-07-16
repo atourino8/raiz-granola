@@ -1,15 +1,16 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { isVerifiedAdmin } from '../../lib/admin';
-import { getAllSettings, settingLabels } from '../../lib/settings';
+import { getAllSettings, settingLabels, settingGroups } from '../../lib/settings';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/login?next=' + encodeURIComponent(Astro.url.pathname));
 if (!isVerifiedAdmin(user)) return Astro.redirect('/');
 
 const settings = await getAllSettings();
-const keys = Object.keys(settingLabels);
 const saved = Astro.url.searchParams.get('saved');
+const field =
+  'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.5 focus:border-miel focus:outline-none';
 ---
 
 <Layout title="Textos — Admin">
@@ -21,16 +22,19 @@ const saved = Astro.url.searchParams.get('saved');
 
     {saved && <p class="mt-4 rounded-lg bg-musgo/15 px-4 py-2 text-sm text-bosque">Textos guardados.</p>}
 
-    <form method="POST" action="/api/admin/settings" class="mt-6 space-y-6">
+    <form method="POST" action="/api/admin/settings" class="mt-6 space-y-10">
       {
-        keys.map((k) => (
+        settingGroups.map((group) => (
           <div>
-            <label class="text-sm font-semibold text-tierra">{settingLabels[k]}</label>
-            <textarea
-              name={k}
-              rows="3"
-              class="mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.5 focus:border-miel focus:outline-none"
-            >{settings[k]}</textarea>
+            <h2 class="font-serif text-xl font-semibold text-tierra">{group.title}</h2>
+            <div class="mt-4 space-y-4">
+              {group.keys.map((k) => (
+                <div>
+                  <label class="text-sm font-semibold text-tierra">{settingLabels[k]}</label>
+                  <textarea name={k} rows="2" class={field}>{settings[k]}</textarea>
+                </div>
+              ))}
+            </div>
           </div>
         ))
       }
