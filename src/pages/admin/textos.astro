@@ -1,0 +1,42 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { isVerifiedAdmin } from '../../lib/admin';
+import { getAllSettings, settingLabels } from '../../lib/settings';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/login?next=' + encodeURIComponent(Astro.url.pathname));
+if (!isVerifiedAdmin(user)) return Astro.redirect('/');
+
+const settings = await getAllSettings();
+const keys = Object.keys(settingLabels);
+const saved = Astro.url.searchParams.get('saved');
+---
+
+<Layout title="Textos — Admin">
+  <section class="mx-auto max-w-3xl px-5 py-12">
+    <div class="flex items-center justify-between">
+      <h1 class="font-serif text-3xl font-semibold text-tierra">Textos de la web</h1>
+      <a href="/admin" class="text-sm font-semibold text-tierra/60 hover:text-miel">← Panel</a>
+    </div>
+
+    {saved && <p class="mt-4 rounded-lg bg-musgo/15 px-4 py-2 text-sm text-bosque">Textos guardados.</p>}
+
+    <form method="POST" action="/api/admin/settings" class="mt-6 space-y-6">
+      {
+        keys.map((k) => (
+          <div>
+            <label class="text-sm font-semibold text-tierra">{settingLabels[k]}</label>
+            <textarea
+              name={k}
+              rows="3"
+              class="mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.5 focus:border-miel focus:outline-none"
+            >{settings[k]}</textarea>
+          </div>
+        ))
+      }
+      <button class="rounded-full bg-bosque px-8 py-3 font-semibold text-crema transition hover:bg-musgo">
+        Guardar textos
+      </button>
+    </form>
+  </section>
+</Layout>

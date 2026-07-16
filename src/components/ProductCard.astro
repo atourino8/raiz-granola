@@ -16,7 +16,17 @@ const { product } = Astro.props;
       class="relative flex h-52 items-center justify-center overflow-hidden"
       style={`background: radial-gradient(circle at 50% 40%, ${product.color}33, ${product.color}12);`}
     >
-      <span class="text-7xl transition group-hover:scale-110">{product.emoji}</span>
+      {
+        product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            class="absolute inset-0 h-full w-full object-cover transition group-hover:scale-105"
+          />
+        ) : (
+          <span class="text-7xl transition group-hover:scale-110">{product.emoji}</span>
+        )
+      }
       <div class="absolute left-4 top-4 flex flex-wrap gap-1.5">
         {
           product.tags.slice(0, 2).map((t) => (

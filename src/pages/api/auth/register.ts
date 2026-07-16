@@ -1,15 +1,16 @@
 import type { APIRoute } from 'astro';
 import { createUser, createSession, findUserByEmail } from '../../../lib/auth';
+import { isVerifiedAdmin } from '../../../lib/admin';
+import { emailEnabled, sendVerificationEmail } from '../../../lib/email';
+import { createToken } from '../../../lib/tokens';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  // sanitize: elimina caracteres de control / CRLF (lección 1.2 del playbook)
   const clean = (v: unknown) => String(v ?? '').replace(/[\x00-\x1F\x7F]+/g, '').trim();
-
   const data = await request.formData();
 
-  // Honeypot: si el bot rellenó el campo oculto, fingimos éxito y no creamos nada.
+  // Honeypot anti-bot
   if (String(data.get('website') ?? '').trim() !== '') {
     return redirect('/cuenta');
   }
@@ -29,7 +30,23 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return back('Ya existe una cuenta con ese email.');
   }
 
-  const user = await createUser(name, email, password);
+  // Si Resend está configurado, la cuenta nace SIN verificar (hay que confirmar
+  // el email). Si no lo está (dev), se auto-verifica para no bloquear el flujo.
+  const verified = !emailEnabled;
+
+  let user;
+  try {
+    user = await createUser(name, email, password, verified);
+  } catch {
+    return back('No se pudo crear la cuenta. Puede que el email ya esté registrado.');
+  }
+
+  if (emailEnabled) {
+    const token = await createToken(user.id, 'verify', 24);
+    const site = import.meta.env.PUBLIC_SITE_URL || new URL(request.url).origin;
+    await sendVerificationEmail(email, `${site}/verificar?token=${token}`);
+  }
+
   await createSession(user.id, cookies);
-  return redirect('/cuenta');
+  return redirect(isVerifiedAdmin(user) ? '/admin' : '/cuenta?bienvenida=1');
 };

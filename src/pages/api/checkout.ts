@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getStripe } from '../../lib/stripe';
-import { getProduct } from '../../lib/products';
+import { getProductBySlug } from '../../lib/catalog';
 import { db, ensureSchema } from '../../lib/db';
 
 export const prerender = false;
@@ -19,13 +19,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return json({ error: 'La cesta está vacía' }, 400);
     }
 
-    // Recalculamos precios en el servidor (nunca confíes en el precio del cliente).
+    // Recalculamos precios en el servidor desde la DB (nunca confíes en el cliente).
     const lineItems = [];
     let amountTotal = 0;
     const summary: Array<{ slug: string; qty: number }> = [];
 
     for (const it of items) {
-      const product = getProduct(it.slug);
+      const product = await getProductBySlug(it.slug);
       const qty = Math.max(1, Math.min(50, Number(it.qty) || 1));
       if (!product) continue;
       amountTotal += product.price * qty;
@@ -79,7 +79,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       cancel_url: `${site}/carrito`,
     });
 
-    // Guardamos el pedido como pendiente.
     await ensureSchema();
     await db.execute({
       sql: `INSERT INTO orders (user_id, stripe_session_id, amount_total, status, items_json)

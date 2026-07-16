@@ -1,15 +1,17 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { products, getProduct, formatPrice } from '../../lib/products';
+import { formatPrice } from '../../lib/products';
+import { getProductBySlug, getActiveProducts } from '../../lib/catalog';
 
 const { slug } = Astro.params;
-const product = getProduct(slug!);
+const product = await getProductBySlug(slug!);
 
 if (!product) {
   return Astro.redirect('/tienda');
 }
 
-const related = products.filter((p) => p.slug !== product.slug).slice(0, 3);
+const all = await getActiveProducts();
+const related = all.filter((p) => p.slug !== product.slug).slice(0, 3);
 
 const productSchema = {
   '@context': 'https://schema.org',
@@ -17,6 +19,7 @@ const productSchema = {
   name: product.name,
   description: product.description,
   category: 'Granola',
+  image: product.imageUrl || undefined,
   offers: {
     '@type': 'Offer',
     price: (product.price / 100).toFixed(2),
@@ -32,10 +35,16 @@ const productSchema = {
 
     <div class="mt-6 grid gap-10 md:grid-cols-2">
       <div
-        class="flex aspect-square items-center justify-center rounded-organic shadow-suave"
+        class="flex aspect-square items-center justify-center overflow-hidden rounded-organic shadow-suave"
         style={`background: radial-gradient(circle at 50% 40%, ${product.color}33, ${product.color}10);`}
       >
-        <span class="text-[11rem]">{product.emoji}</span>
+        {
+          product.imageUrl ? (
+            <img src={product.imageUrl} alt={product.name} class="h-full w-full object-cover" />
+          ) : (
+            <span class="text-[11rem]">{product.emoji}</span>
+          )
+        }
       </div>
 
       <div>
@@ -90,7 +99,6 @@ const productSchema = {
       </div>
     </div>
 
-    <!-- Relacionados -->
     <div class="mt-20">
       <h2 class="font-serif text-2xl font-semibold text-tierra">También te puede gustar</h2>
       <div class="mt-6 grid gap-4 sm:grid-cols-3">

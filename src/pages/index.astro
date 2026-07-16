@@ -1,9 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { products } from '../lib/products';
+import { getFeaturedProducts } from '../lib/catalog';
+import { getSetting } from '../lib/settings';
 
-const featured = products.filter((p) => p.featured);
+const featured = await getFeaturedProducts();
+const heroSubtitle = await getSetting('home_hero_subtitle');
+const storyText = await getSetting('home_story_text');
+
 const valores = [
   { icon: '🌱', title: 'Ingredientes ecológicos', text: 'Avena de cultivo ecológico y frutos secos de proximidad, sin aditivos ni conservantes.' },
   { icon: '🔥', title: 'Horneada a fuego lento', text: 'En pequeños lotes en nuestro obrador, para conseguir ese punto crujiente y dorado.' },
@@ -13,7 +17,6 @@ const valores = [
 ---
 
 <Layout>
-  <!-- Hero -->
   <section class="grain relative overflow-hidden">
     <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
       <div>
@@ -23,10 +26,7 @@ const valores = [
         <h1 class="mt-5 font-serif text-4xl font-semibold leading-tight text-tierra md:text-6xl">
           Granola horneada<br /><span class="text-miel">a fuego lento</span>
         </h1>
-        <p class="mt-5 max-w-md text-lg leading-relaxed text-tierra/75">
-          Avena ecológica, miel cruda y frutos secos tostados en el punto justo.
-          Sin azúcares refinados, sin prisa. Del horno directa a tu desayuno.
-        </p>
+        <p class="mt-5 max-w-md text-lg leading-relaxed text-tierra/75">{heroSubtitle}</p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a
             href="/tienda"
@@ -61,7 +61,6 @@ const valores = [
     </div>
   </section>
 
-  <!-- Valores -->
   <section class="mx-auto max-w-6xl px-5 py-8">
     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {
@@ -76,7 +75,6 @@ const valores = [
     </div>
   </section>
 
-  <!-- Destacados -->
   <section class="mx-auto max-w-6xl px-5 py-16">
     <div class="flex items-end justify-between">
       <div>
@@ -92,7 +90,6 @@ const valores = [
     </div>
   </section>
 
-  <!-- Franja historia -->
   <section class="grain relative overflow-hidden bg-bosque text-crema">
     <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2">
       <div class="flex aspect-video items-center justify-center rounded-organic bg-musgo/40">
@@ -100,11 +97,7 @@ const valores = [
       </div>
       <div>
         <h2 class="font-serif text-3xl font-semibold md:text-4xl">Empezó en una cocina pequeña</h2>
-        <p class="mt-4 leading-relaxed text-crema/80">
-          Raíz nació el día que dejamos de encontrar una granola que no llevara media
-          bolsa de azúcar. Así que la hicimos nosotros. Seguimos horneando cada tanda a
-          mano, con la misma receta y la misma manía por el detalle.
-        </p>
+        <p class="mt-4 leading-relaxed text-crema/80">{storyText}</p>
         <a
           href="/nosotros"
           class="mt-6 inline-block rounded-full bg-miel px-6 py-3 font-semibold text-tierra transition hover:bg-crema"

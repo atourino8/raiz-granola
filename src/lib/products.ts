@@ -1,7 +1,8 @@
-// Catálogo de productos. En un proyecto real vendría de la base de datos
-// o de un CMS; aquí lo mantenemos como fuente de datos tipada y editable.
+// Tipos y utilidades de producto (seguro para el cliente: sin acceso a DB).
+// Los datos "semilla" pueblan la tabla `products` la primera vez (ver catalog.ts).
 
 export interface Product {
+  id?: number;
   slug: string;
   name: string;
   tagline: string;
@@ -11,13 +12,19 @@ export interface Product {
   weight: string;
   ingredients: string[];
   tags: string[];
-  /** Emoji/ilustración de respaldo mientras no haya fotografía */
   emoji: string;
   color: string;
-  featured?: boolean;
+  imageUrl: string;
+  featured: boolean;
+  active: boolean;
+  sortOrder: number;
 }
 
-export const products: Product[] = [
+export function formatPrice(cents: number): string {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+}
+
+export const seedProducts: Product[] = [
   {
     slug: 'clasica-miel',
     name: 'Clásica de Miel',
@@ -30,7 +37,10 @@ export const products: Product[] = [
     tags: ['Vegetariana', 'Sin azúcar refinado'],
     emoji: '🍯',
     color: '#C99A3F',
+    imageUrl: '',
     featured: true,
+    active: true,
+    sortOrder: 1,
   },
   {
     slug: 'cacao-avellana',
@@ -44,7 +54,10 @@ export const products: Product[] = [
     tags: ['Vegana', 'Alta en fibra'],
     emoji: '🍫',
     color: '#B5642F',
+    imageUrl: '',
     featured: true,
+    active: true,
+    sortOrder: 2,
   },
   {
     slug: 'frutos-rojos',
@@ -58,7 +71,10 @@ export const products: Product[] = [
     tags: ['Vegana', 'Sin gluten*'],
     emoji: '🫐',
     color: '#8E5572',
+    imageUrl: '',
     featured: true,
+    active: true,
+    sortOrder: 3,
   },
   {
     slug: 'proteica-cacahuete',
@@ -72,6 +88,10 @@ export const products: Product[] = [
     tags: ['Vegana', 'Rica en proteína'],
     emoji: '🥜',
     color: '#9C6B3F',
+    imageUrl: '',
+    featured: false,
+    active: true,
+    sortOrder: 4,
   },
   {
     slug: 'jengibre-manzana',
@@ -85,6 +105,10 @@ export const products: Product[] = [
     tags: ['Vegetariana', 'Sin azúcar refinado'],
     emoji: '🍎',
     color: '#A6702E',
+    imageUrl: '',
+    featured: false,
+    active: true,
+    sortOrder: 5,
   },
   {
     slug: 'caja-degustacion',
@@ -98,14 +122,9 @@ export const products: Product[] = [
     tags: ['Regalo', 'Novedad'],
     emoji: '🎁',
     color: '#37503B',
+    imageUrl: '',
     featured: true,
+    active: true,
+    sortOrder: 6,
   },
 ];
-
-export function getProduct(slug: string): Product | undefined {
-  return products.find((p) => p.slug === slug);
-}
-
-export function formatPrice(cents: number): string {
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(cents / 100);
-}

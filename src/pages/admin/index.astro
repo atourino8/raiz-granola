@@ -1,0 +1,48 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { isVerifiedAdmin } from '../../lib/admin';
+import { getAllProductsAdmin } from '../../lib/catalog';
+import { db, ensureSchema } from '../../lib/db';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/login?next=' + encodeURIComponent(Astro.url.pathname));
+if (!isVerifiedAdmin(user)) return Astro.redirect('/');
+
+const products = await getAllProductsAdmin();
+await ensureSchema();
+const res = await db.execute(
+  "SELECT COUNT(*) AS n, COALESCE(SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END), 0) AS paid FROM orders",
+);
+const totalOrders = Number(res.rows[0].n);
+const paidOrders = Number(res.rows[0].paid);
+
+const cards = [
+  { label: 'Productos', value: products.length, href: '/admin/productos' },
+  { label: 'Pedidos', value: totalOrders, href: '/admin/pedidos' },
+  { label: 'Pedidos pagados', value: paidOrders, href: '/admin/pedidos' },
+];
+---
+
+<Layout title="Admin — Raíz Granola">
+  <section class="mx-auto max-w-5xl px-5 py-12">
+    <h1 class="font-serif text-4xl font-semibold text-tierra">Panel de administración</h1>
+    <p class="mt-2 text-tierra/70">Gestiona el catálogo, los pedidos y los textos de la web.</p>
+
+    <div class="mt-8 grid gap-5 sm:grid-cols-3">
+      {
+        cards.map((c) => (
+          <a href={c.href} class="rounded-organic border border-avena/50 bg-white/70 p-6 shadow-suave transition hover:border-miel">
+            <p class="text-sm font-semibold uppercase tracking-wide text-tierra/60">{c.label}</p>
+            <p class="mt-2 font-serif text-4xl font-semibold text-bosque">{c.value}</p>
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="/admin/productos" class="rounded-full bg-bosque px-6 py-3 font-semibold text-crema hover:bg-musgo">Gestionar productos</a>
+      <a href="/admin/pedidos" class="rounded-full border border-bosque/30 px-6 py-3 font-semibold text-bosque hover:bg-bosque/10">Ver pedidos</a>
+      <a href="/admin/textos" class="rounded-full border border-bosque/30 px-6 py-3 font-semibold text-bosque hover:bg-bosque/10">Editar textos</a>
+    </div>
+  </section>
+</Layout>

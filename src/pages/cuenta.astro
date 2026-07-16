@@ -1,7 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { db, ensureSchema } from '../lib/db';
-import { formatPrice, getProduct } from '../lib/products';
+import { formatPrice } from '../lib/products';
+import { getAllProductsAdmin } from '../lib/catalog';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/login');
@@ -12,6 +13,10 @@ const res = await db.execute({
         FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 20`,
   args: [user.id],
 });
+
+const products = await getAllProductsAdmin();
+const bySlug: Record<string, { name: string; emoji: string }> = {};
+for (const p of products) bySlug[p.slug] = { name: p.name, emoji: p.emoji };
 
 const orders = res.rows.map((r) => ({
   id: Number(r.id),
@@ -25,7 +30,11 @@ const statusLabel: Record<string, string> = {
   pending: 'Pendiente de pago',
   paid: 'Pagado',
   fulfilled: 'Enviado',
+  cancelled: 'Cancelado',
 };
+
+const bienvenida = Astro.url.searchParams.get('bienvenida');
+const reenviado = Astro.url.searchParams.get('reenviado');
 ---
 
 <Layout title="Mi cuenta — Raíz Granola">
@@ -41,6 +50,26 @@ const statusLabel: Record<string, string> = {
         </button>
       </form>
     </div>
+
+    {reenviado && <p class="mt-6 rounded-lg bg-musgo/15 px-4 py-3 text-sm text-bosque">Te hemos reenviado el email de verificación.</p>}
+
+    {
+      !user.emailVerified && (
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-organic border border-miel/40 bg-miel/10 p-5">
+          <div>
+            <p class="font-semibold text-tierra">Verifica tu email</p>
+            <p class="text-sm text-tierra/70">
+              {bienvenida ? '¡Bienvenida! ' : ''}Te hemos enviado un enlace a {user.email}. Confírmalo para activar todo.
+            </p>
+          </div>
+          <form method="POST" action="/api/auth/resend">
+            <button class="rounded-full bg-bosque px-5 py-2.5 text-sm font-semibold text-crema hover:bg-musgo">
+              Reenviar email
+            </button>
+          </form>
+        </div>
+      )
+    }
 
     <h2 class="mt-12 font-serif text-2xl font-semibold text-tierra">Tus pedidos</h2>
 
@@ -66,14 +95,11 @@ const statusLabel: Record<string, string> = {
                 </span>
               </div>
               <div class="mt-3 flex flex-wrap gap-3 text-sm text-tierra/70">
-                {o.items.map((it) => {
-                  const p = getProduct(it.slug);
-                  return (
-                    <span>
-                      {p?.emoji} {p?.name ?? it.slug} × {it.qty}
-                    </span>
-                  );
-                })}
+                {o.items.map((it) => (
+                  <span>
+                    {bySlug[it.slug]?.emoji ?? '🌾'} {bySlug[it.slug]?.name ?? it.slug} × {it.qty}
+                  </span>
+                ))}
               </div>
               <p class="mt-3 font-semibold text-bosque">{formatPrice(o.total)}</p>
             </div>

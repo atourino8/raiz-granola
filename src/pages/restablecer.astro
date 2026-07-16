@@ -1,0 +1,45 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const token = Astro.url.searchParams.get('token') ?? '';
+const error = Astro.url.searchParams.get('error');
+---
+
+<Layout title="Nueva contraseña — Raíz Granola">
+  <section class="mx-auto max-w-md px-5 py-16">
+    <div class="rounded-organic border border-avena/50 bg-white/70 p-8 shadow-suave">
+      <h1 class="font-serif text-3xl font-semibold text-tierra">Nueva contraseña</h1>
+      <p class="mt-2 text-sm text-tierra/70">Elige una contraseña nueva para tu cuenta.</p>
+
+      {error && <p class="mt-4 rounded-lg bg-terracota/10 px-4 py-2 text-sm text-terracota">{error}</p>}
+
+      {
+        token ? (
+          <form method="POST" action="/api/auth/reset" class="mt-6 space-y-4">
+            <input type="hidden" name="token" value={token} />
+            <div>
+              <label class="text-sm font-semibold text-tierra" for="password">Contraseña nueva</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minlength="8"
+                class="mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-3 focus:border-miel focus:outline-none"
+              />
+              <p class="mt-1 text-xs text-tierra/50">Mínimo 8 caracteres.</p>
+            </div>
+            <button class="w-full rounded-full bg-bosque px-6 py-3.5 font-semibold text-crema transition hover:bg-musgo">
+              Guardar contraseña
+            </button>
+          </form>
+        ) : (
+          <p class="mt-6 rounded-lg bg-terracota/10 px-4 py-3 text-sm text-terracota">
+            Falta el enlace de recuperación. Vuelve a pedir uno desde
+            <a href="/recuperar" class="font-semibold underline">recuperar contraseña</a>.
+          </p>
+        )
+      }
+    </div>
+  </section>
+</Layout>

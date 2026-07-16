@@ -1,0 +1,82 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { isVerifiedAdmin } from '../../lib/admin';
+import { db, ensureSchema } from '../../lib/db';
+import { formatPrice } from '../../lib/products';
+import { getAllProductsAdmin } from '../../lib/catalog';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/login?next=' + encodeURIComponent(Astro.url.pathname));
+if (!isVerifiedAdmin(user)) return Astro.redirect('/');
+
+await ensureSchema();
+const res = await db.execute(
+  `SELECT o.id, o.amount_total, o.status, o.items_json, o.created_at, u.email AS user_email
+   FROM orders o LEFT JOIN users u ON u.id = o.user_id
+   ORDER BY o.created_at DESC LIMIT 100`,
+);
+
+const products = await getAllProductsAdmin();
+const nameBySlug: Record<string, string> = {};
+for (const p of products) nameBySlug[p.slug] = p.name;
+
+const orders = res.rows.map((r) => ({
+  id: Number(r.id),
+  total: Number(r.amount_total),
+  status: String(r.status),
+  email: r.user_email ? String(r.user_email) : '—',
+  date: String(r.created_at),
+  items: (JSON.parse(String(r.items_json)) as Array<{ slug: string; qty: number }>).map(
+    (it) => `${nameBySlug[it.slug] ?? it.slug} ×${it.qty}`,
+  ),
+}));
+
+const statuses = ['pending', 'paid', 'fulfilled', 'cancelled'];
+const label: Record<string, string> = {
+  pending: 'Pendiente',
+  paid: 'Pagado',
+  fulfilled: 'Enviado',
+  cancelled: 'Cancelado',
+};
+const saved = Astro.url.searchParams.get('saved');
+---
+
+<Layout title="Pedidos — Admin">
+  <section class="mx-auto max-w-5xl px-5 py-12">
+    <div class="flex items-center justify-between">
+      <h1 class="font-serif text-3xl font-semibold text-tierra">Pedidos</h1>
+      <a href="/admin" class="text-sm font-semibold text-tierra/60 hover:text-miel">← Panel</a>
+    </div>
+
+    {saved && <p class="mt-4 rounded-lg bg-musgo/15 px-4 py-2 text-sm text-bosque">Estado actualizado.</p>}
+
+    {
+      orders.length === 0 ? (
+        <p class="mt-8 text-tierra/70">Todavía no hay pedidos.</p>
+      ) : (
+        <div class="mt-6 space-y-4">
+          {orders.map((o) => (
+            <div class="rounded-2xl border border-avena/50 bg-white/70 p-5">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="font-serif font-semibold text-tierra">Pedido #{o.id} · {formatPrice(o.total)}</p>
+                  <p class="text-sm text-tierra/60">{new Date(o.date).toLocaleString('es-ES')} · {o.email}</p>
+                  <p class="mt-1 text-sm text-tierra/70">{o.items.join(' · ')}</p>
+                </div>
+                <form method="POST" action="/api/admin/order-status" class="flex items-center gap-2">
+                  <input type="hidden" name="id" value={o.id} />
+                  <select name="status" class="rounded-lg border border-avena/70 bg-crema px-3 py-2 text-sm">
+                    {statuses.map((s) => (
+                      <option value={s} selected={s === o.status}>{label[s]}</option>
+                    ))}
+                  </select>
+                  <button class="rounded-full bg-bosque px-4 py-2 text-sm font-semibold text-crema hover:bg-musgo">Guardar</button>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+  </section>
+</Layout>

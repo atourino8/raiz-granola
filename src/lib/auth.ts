@@ -9,6 +9,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  emailVerified: boolean;
 }
 
 // ─── Hash de contraseñas con scrypt (nativo de Node, sin dependencias) ───
@@ -29,24 +30,49 @@ export function verifyPassword(password: string, stored: string): boolean {
 
 // ─── Usuarios ───
 
-export async function createUser(name: string, email: string, password: string): Promise<User> {
+export async function createUser(
+  name: string,
+  email: string,
+  password: string,
+  verified = false,
+): Promise<User> {
   await ensureSchema();
   const password_hash = hashPassword(password);
   const res = await db.execute({
-    sql: 'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?) RETURNING id, name, email',
-    args: [name, email.toLowerCase().trim(), password_hash],
+    sql: `INSERT INTO users (name, email, password_hash, email_verified)
+          VALUES (?, ?, ?, ?)
+          RETURNING id, name, email, email_verified`,
+    args: [name, email.toLowerCase().trim(), password_hash, verified ? 1 : 0],
   });
   const row = res.rows[0];
-  return { id: Number(row.id), name: String(row.name), email: String(row.email) };
+  return {
+    id: Number(row.id),
+    name: String(row.name),
+    email: String(row.email),
+    emailVerified: Number(row.email_verified) === 1,
+  };
 }
 
 export async function findUserByEmail(email: string) {
   await ensureSchema();
   const res = await db.execute({
-    sql: 'SELECT id, name, email, password_hash FROM users WHERE email = ?',
+    sql: 'SELECT id, name, email, password_hash, email_verified FROM users WHERE email = ?',
     args: [email.toLowerCase().trim()],
   });
   return res.rows[0] ?? null;
+}
+
+export async function setEmailVerified(userId: number): Promise<void> {
+  await ensureSchema();
+  await db.execute({ sql: 'UPDATE users SET email_verified = 1 WHERE id = ?', args: [userId] });
+}
+
+export async function updatePassword(userId: number, password: string): Promise<void> {
+  await ensureSchema();
+  await db.execute({
+    sql: 'UPDATE users SET password_hash = ? WHERE id = ?',
+    args: [hashPassword(password), userId],
+  });
 }
 
 // ─── Sesiones ───
@@ -73,7 +99,7 @@ export async function getUserFromSession(cookies: AstroCookies): Promise<User | 
   if (!id) return null;
   await ensureSchema();
   const res = await db.execute({
-    sql: `SELECT u.id, u.name, u.email, s.expires_at
+    sql: `SELECT u.id, u.name, u.email, u.email_verified, s.expires_at
           FROM sessions s JOIN users u ON u.id = s.user_id
           WHERE s.id = ?`,
     args: [id],
@@ -84,7 +110,12 @@ export async function getUserFromSession(cookies: AstroCookies): Promise<User | 
     await db.execute({ sql: 'DELETE FROM sessions WHERE id = ?', args: [id] });
     return null;
   }
-  return { id: Number(row.id), name: String(row.name), email: String(row.email) };
+  return {
+    id: Number(row.id),
+    name: String(row.name),
+    email: String(row.email),
+    emailVerified: Number(row.email_verified) === 1,
+  };
 }
 
 export async function destroySession(cookies: AstroCookies): Promise<void> {

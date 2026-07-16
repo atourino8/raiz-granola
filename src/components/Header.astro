@@ -1,8 +1,11 @@
 ---
+import { isVerifiedAdmin } from '../lib/admin';
+
 interface Props {
   user: { id: number; name: string; email: string } | null;
 }
 const { user } = Astro.props;
+const admin = isVerifiedAdmin(user);
 const path = Astro.url.pathname;
 const links = [
   { href: '/tienda', label: 'Tienda' },
@@ -32,6 +35,21 @@ const links = [
             </a>
           </li>
         ))
+      }
+      {
+        admin && (
+          <li>
+            <a
+              href="/admin"
+              class:list={[
+                'transition-colors hover:text-miel',
+                path.startsWith('/admin') ? 'text-miel' : 'text-tierra/80',
+              ]}
+            >
+              Admin
+            </a>
+          </li>
+        )
       }
     </ul>
 

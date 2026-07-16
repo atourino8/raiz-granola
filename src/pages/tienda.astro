@@ -1,7 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { products } from '../lib/products';
+import { getActiveProducts } from '../lib/catalog';
+
+const products = await getActiveProducts();
 ---
 
 <Layout title="Tienda — Raíz Granola">
@@ -12,7 +14,7 @@ import { products } from '../lib/products';
         Elige tu granola
       </h1>
       <p class="mt-3 text-lg text-tierra/70">
-        Seis recetas horneadas a mano. Todas sin azúcares refinados y en bolsa
+        Recetas horneadas a mano. Todas sin azúcares refinados y en bolsa
         compostable. ¿No te decides? Prueba la caja degustación.
       </p>
     </div>

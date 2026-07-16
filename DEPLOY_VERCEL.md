@@ -110,6 +110,9 @@ Añádelas **en el proyecto** (Settings → Environment Variables), marcadas par
 | `STRIPE_SECRET_KEY` | `sk_test_...` (o déjala con el placeholder por ahora) |
 | `STRIPE_PUBLISHABLE_KEY` | `pk_test_...` |
 | `PUBLIC_SITE_URL` | La URL de Vercel (la sabrás tras el primer deploy) |
+| `ADMIN_EMAILS` | Tu email y el de tu socia (separados por comas) para entrar en /admin |
+| `RESEND_API_KEY` | Clave de Resend (resend.com) para enviar verificación y reset |
+| `EMAIL_FROM` | Remitente, ej. `Raíz Granola <onboarding@resend.dev>` |
 
 Genera `SESSION_SECRET` en PowerShell:
 

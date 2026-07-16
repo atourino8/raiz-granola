@@ -61,6 +61,9 @@ npm run dev
 | `STRIPE_PUBLISHABLE_KEY` | Pagos (cliente) | Misma pantalla (`pk_test_...`). |
 | `STRIPE_WEBHOOK_SECRET` | Webhook (opcional) | Ver sección Webhook. |
 | `PUBLIC_SITE_URL` | Redirecciones de Stripe | `http://localhost:4321` en dev; tu dominio en producción. |
+| `ADMIN_EMAILS` | Acceso al panel /admin | Tu email (y el de tu socia), separados por comas. |
+| `RESEND_API_KEY` | Emails (verificación, reset) | resend.com → API Keys. Sin ella, en local las cuentas se auto-verifican. |
+| `EMAIL_FROM` | Remitente de los emails | Ej. `Raíz Granola <onboarding@resend.dev>`. |
 
 > ⚠️ **Copia-pega las claves, no las escribas a mano** (lección 6.1 del playbook:
 > un typo en el nombre de la variable falla en silencio en runtime).
@@ -124,9 +127,19 @@ src/
         └── webhook.ts           ← confirma pago
 ```
 
-Para editar el catálogo, toca `src/lib/products.ts`. Cuando tengas fotos reales,
-sustituye el emoji/gradiente de `ProductCard.astro` y `producto/[slug].astro`
-por `<img>`.
+El catálogo vive en la tabla `products` de la base de datos y se gestiona desde
+`/admin`. `src/lib/products.ts` solo contiene los datos semilla que pueblan la DB
+la primera vez. Las fotos se añaden por URL desde el panel.
+
+---
+
+## Panel de administración
+
+Entra en `/admin` con una cuenta cuyo email esté en `ADMIN_EMAILS`. Desde ahí
+puedes gestionar **productos** (crear, editar, borrar, foto por URL), ver y
+actualizar el estado de los **pedidos**, y editar los **textos** de la home y de
+"Nuestra historia". Los productos viven en la base de datos, así que el checkout
+siempre valida el precio real contra la DB.
 
 ---
 

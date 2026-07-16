@@ -1,5 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { getSetting } from '../lib/settings';
+
+const intro = await getSetting('nosotros_intro');
 
 const pasos = [
   { n: '01', t: 'Elegimos el grano', d: 'Avena ecológica de productores de proximidad, integral y sin refinar.' },
@@ -16,12 +19,7 @@ const pasos = [
       <h1 class="mt-3 font-serif text-4xl font-semibold text-tierra md:text-5xl">
         Volver a lo esencial
       </h1>
-      <p class="mt-5 text-lg leading-relaxed text-tierra/75">
-        Raíz nació de una frustración pequeña y cotidiana: no encontrar una granola
-        que supiera de verdad a cereal y fruta, sin media bolsa de azúcar escondida.
-        Así que encendimos el horno de casa y empezamos a probar. Tres años después
-        seguimos horneando en lotes pequeños, con las mismas manos y la misma manía.
-      </p>
+      <p class="mt-5 text-lg leading-relaxed text-tierra/75">{intro}</p>
     </div>
   </section>
 

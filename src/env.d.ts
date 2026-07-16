@@ -7,6 +7,7 @@ declare namespace App {
       id: number;
       name: string;
       email: string;
+      emailVerified: boolean;
     } | null;
   }
 }
@@ -19,6 +20,9 @@ interface ImportMetaEnv {
   readonly STRIPE_PUBLISHABLE_KEY: string;
   readonly STRIPE_WEBHOOK_SECRET?: string;
   readonly PUBLIC_SITE_URL: string;
+  readonly ADMIN_EMAILS?: string;
+  readonly RESEND_API_KEY?: string;
+  readonly EMAIL_FROM?: string;
 }
 
 interface ImportMeta {
