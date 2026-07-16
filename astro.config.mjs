@@ -11,6 +11,10 @@ export default defineConfig({
   adapter: vercel(),
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      // Nunca incrustar scripts inline: la CSP (script-src 'self') los bloquearía.
+      assetsInlineLimit: 0,
+    },
   },
   server: { port: 4321 },
 });

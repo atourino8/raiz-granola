@@ -1,9 +1,10 @@
 ---
-// Aviso de cookies. Solo usamos cookies necesarias, así que es informativo.
+// Aviso de cookies (solo informativo: únicamente usamos cookies necesarias).
+// Visible por defecto SIN depender de JS; el script lo oculta si ya se aceptó.
 ---
 
-<div id="cookie-banner" class="fixed inset-x-0 bottom-0 z-50 hidden">
-  <div class="mx-auto m-4 max-w-3xl rounded-organic border border-avena/60 bg-crema/95 p-5 shadow-suave backdrop-blur">
+<div id="cookie-banner" class="fixed inset-x-0 bottom-0 z-50">
+  <div class="mx-auto my-4 max-w-3xl rounded-organic border border-avena/60 bg-crema/95 p-5 shadow-suave backdrop-blur">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <p class="text-sm text-tierra/80">
         Usamos solo cookies necesarias para que la tienda funcione — sin publicidad ni analítica.
@@ -24,9 +25,9 @@
   const KEY = 'raiz_cookie_consent';
   const banner = document.getElementById('cookie-banner');
   try {
-    if (banner && !localStorage.getItem(KEY)) banner.classList.remove('hidden');
+    if (banner && localStorage.getItem(KEY)) banner.remove();
   } catch {
-    /* localStorage no disponible */
+    /* localStorage no disponible: el banner simplemente queda visible */
   }
   banner?.querySelector('[data-accept]')?.addEventListener('click', () => {
     try {
@@ -34,6 +35,6 @@
     } catch {
       /* no-op */
     }
-    banner.classList.add('hidden');
+    banner.remove();
   });
 </script>
