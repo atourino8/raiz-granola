@@ -10,6 +10,9 @@ export const defaultSettings: Record<string, string> = {
   brand_emoji: '🌾',
   brand_favicon: '',
 
+  // Orden de los bloques de la home (ids separados por comas)
+  home_block_order: 'hero,valores,favoritas,historia',
+
   // Home · Hero
   home_hero_badge: '🌾 Obrador artesanal · Lotes pequeños',
   home_hero_title_1: 'Granola horneada',
@@ -75,6 +78,7 @@ export const settingLabels: Record<string, string> = {
   brand_name: 'Nombre de la marca',
   brand_emoji: 'Emoji/icono de la marca',
   brand_favicon: 'Favicon propio (URL .png/.svg/.ico, opcional)',
+  home_block_order: 'Orden de los bloques de la home',
   home_hero_badge: 'Etiqueta superior del hero',
   home_hero_title_1: 'Titular (línea 1)',
   home_hero_title_2: 'Titular (línea 2, en color)',
@@ -119,6 +123,7 @@ export const settingLabels: Record<string, string> = {
 // Agrupación para el panel /admin/textos (mejor UX).
 export const settingGroups: Array<{ title: string; keys: string[] }> = [
   { title: 'Marca', keys: ['brand_name', 'brand_emoji', 'brand_favicon'] },
+  { title: 'Home · Orden de bloques', keys: ['home_block_order'] },
   {
     title: 'Home · Portada',
     keys: [
@@ -152,6 +157,13 @@ export const settingGroups: Array<{ title: string; keys: string[] }> = [
     keys: ['home_hero_image', 'home_story_image', 'nosotros_compromiso_image'],
   },
   { title: 'Pie de página', keys: ['footer_tagline'] },
+];
+
+export const homeBlocks: Array<{ id: string; label: string }> = [
+  { id: 'hero', label: 'Portada (hero)' },
+  { id: 'valores', label: 'Valores' },
+  { id: 'favoritas', label: 'Productos favoritos' },
+  { id: 'historia', label: 'Historia' },
 ];
 
 export async function getSetting(key: string): Promise<string> {

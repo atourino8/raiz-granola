@@ -1,0 +1,24 @@
+---
+interface Props { s: Record<string, string>; }
+const { s } = Astro.props;
+---
+<section class="grain relative overflow-hidden bg-bosque text-crema">
+  <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2">
+    <div class="flex aspect-video items-center justify-center overflow-hidden rounded-organic bg-musgo/40">
+      {
+        s.home_story_image ? (
+          <img src={s.home_story_image} alt="Nuestro obrador" class="h-full w-full object-cover" />
+        ) : (
+          <span class="text-8xl">👩‍🍳</span>
+        )
+      }
+    </div>
+    <div>
+      <h2 class="font-serif text-3xl font-semibold md:text-4xl">{s.home_story_title}</h2>
+      <p class="mt-4 leading-relaxed text-crema/80">{s.home_story_text}</p>
+      <a href="/nosotros" class="mt-6 inline-block rounded-full bg-miel px-6 py-3 font-semibold text-tierra transition hover:bg-crema">
+        {s.home_story_cta}
+      </a>
+    </div>
+  </div>
+</section>

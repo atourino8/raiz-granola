@@ -1,0 +1,54 @@
+---
+import { homeBlocks } from '../lib/settings';
+interface Props { value: string; }
+const { value } = Astro.props;
+
+const current = value.split(',').map((x) => x.trim()).filter(Boolean);
+const ordered = [
+  ...current.map((id) => homeBlocks.find((b) => b.id === id)).filter(Boolean),
+  ...homeBlocks.filter((b) => !current.includes(b.id)),
+] as Array<{ id: string; label: string }>;
+---
+
+<div data-block-order>
+  <label class="text-sm font-semibold text-tierra">Orden de los bloques de la home</label>
+  <p class="text-xs text-tierra/50">Usa las flechas para reordenar. Se guarda al pulsar “Guardar textos”.</p>
+  <input type="hidden" name="home_block_order" value={ordered.map((b) => b.id).join(',')} data-order-value />
+  <ul class="mt-2 space-y-2">
+    {
+      ordered.map((b) => (
+        <li data-id={b.id} class="flex items-center justify-between rounded-xl border border-avena/60 bg-crema px-4 py-2">
+          <span class="text-sm font-semibold text-tierra">{b.label}</span>
+          <span class="flex gap-1">
+            <button type="button" data-up aria-label="Subir" class="rounded px-2 py-1 text-tierra/70 hover:bg-bosque/10">↑</button>
+            <button type="button" data-down aria-label="Bajar" class="rounded px-2 py-1 text-tierra/70 hover:bg-bosque/10">↓</button>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  function sync(box: Element) {
+    const ids = Array.from(box.querySelectorAll('li[data-id]')).map((li) => li.getAttribute('data-id'));
+    const hidden = box.querySelector('[data-order-value]') as HTMLInputElement | null;
+    if (hidden) hidden.value = ids.join(',');
+  }
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const btn = target.closest('[data-up],[data-down]');
+    if (!btn) return;
+    const box = btn.closest('[data-block-order]');
+    const li = btn.closest('li');
+    if (!box || !li) return;
+    if (btn.hasAttribute('data-up')) {
+      const prev = li.previousElementSibling;
+      if (prev) li.parentNode!.insertBefore(li, prev);
+    } else {
+      const next = li.nextElementSibling;
+      if (next) li.parentNode!.insertBefore(next, li);
+    }
+    sync(box);
+  });
+</script>

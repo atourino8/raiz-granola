@@ -1,0 +1,47 @@
+---
+interface Props { s: Record<string, string>; }
+const { s } = Astro.props;
+---
+<section class="grain relative overflow-hidden">
+  <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
+    <div>
+      <span class="inline-flex items-center gap-2 rounded-full bg-bosque/10 px-4 py-1.5 text-sm font-semibold text-bosque">
+        {s.home_hero_badge}
+      </span>
+      <h1 class="mt-5 font-serif text-4xl font-semibold leading-tight text-tierra md:text-6xl">
+        {s.home_hero_title_1}<br /><span class="text-miel">{s.home_hero_title_2}</span>
+      </h1>
+      <p class="mt-5 max-w-md text-lg leading-relaxed text-tierra/75">{s.home_hero_subtitle}</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/tienda" class="rounded-full bg-bosque px-7 py-3.5 font-semibold text-crema shadow-suave transition hover:bg-musgo">
+          {s.home_hero_cta1}
+        </a>
+        <a href="/producto/caja-degustacion" class="rounded-full border border-bosque/30 px-7 py-3.5 font-semibold text-bosque transition hover:bg-bosque/10">
+          {s.home_hero_cta2}
+        </a>
+      </div>
+      <div class="mt-8 flex items-center gap-6 text-sm text-tierra/60">
+        <span>{s.home_hero_badge2}</span>
+        <span>{s.home_hero_badge3}</span>
+      </div>
+    </div>
+
+    <div class="relative">
+      <div class="mx-auto flex aspect-square max-w-md items-center justify-center overflow-hidden rounded-organic bg-gradient-to-br from-avena via-arena to-miel/40 shadow-suave">
+        {
+          s.home_hero_image ? (
+            <img src={s.home_hero_image} alt="Granola" class="h-full w-full object-cover" />
+          ) : (
+            <span class="text-[10rem] drop-shadow">🥣</span>
+          )
+        }
+      </div>
+      <div class="absolute -bottom-4 -left-2 rotate-[-6deg] rounded-2xl bg-white/90 px-4 py-3 text-sm font-semibold text-bosque shadow-suave">
+        100% ecológica 🌱
+      </div>
+      <div class="absolute -right-2 top-6 rotate-[8deg] rounded-2xl bg-white/90 px-4 py-3 text-sm font-semibold text-terracota shadow-suave">
+        Sin azúcar refinado
+      </div>
+    </div>
+  </div>
+</section>
