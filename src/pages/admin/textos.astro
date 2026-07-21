@@ -18,13 +18,20 @@ const field =
 <Layout title="Textos — Admin">
   <section class="mx-auto max-w-3xl px-5 py-12">
     <div class="flex items-center justify-between">
-      <h1 class="font-serif text-3xl font-semibold text-tierra">Textos de la web</h1>
+      <h1 class="font-serif text-3xl font-semibold text-tierra">Textos e imágenes de la web</h1>
       <a href="/admin" class="text-sm font-semibold text-tierra/60 hover:text-miel">← Panel</a>
     </div>
 
-    {saved && <p class="mt-4 rounded-lg bg-musgo/15 px-4 py-2 text-sm text-bosque">Textos guardados.</p>}
+    <p class="mt-3 rounded-xl border border-avena/60 bg-arena/50 px-4 py-3 text-sm text-tierra/75">
+      Edita cualquier texto o foto de la web. En las imágenes puedes <strong>subir un archivo</strong> desde tu
+      ordenador o pegar un enlace. Recuerda: <strong>nada se publica hasta que pulsas «Guardar» al final</strong>.
+    </p>
 
-    <form method="POST" action="/api/admin/settings" class="mt-6 space-y-10">
+    {saved && (
+      <p class="mt-4 rounded-lg bg-musgo/15 px-4 py-2 text-sm text-bosque">✓ Cambios guardados y publicados.</p>
+    )}
+
+    <form method="POST" action="/api/admin/settings" class="mt-6 space-y-10 pb-24">
       {
         settingGroups.map((group) => (
           <div>
@@ -46,9 +53,13 @@ const field =
           </div>
         ))
       }
-      <button class="rounded-full bg-bosque px-8 py-3 font-semibold text-crema transition hover:bg-musgo">
-        Guardar textos
-      </button>
+
+      <div class="sticky bottom-0 -mx-5 mt-6 border-t border-avena/60 bg-crema/95 px-5 py-4 backdrop-blur">
+        <button class="w-full rounded-full bg-bosque px-8 py-3.5 font-semibold text-crema shadow-suave transition hover:bg-musgo sm:w-auto">
+          Guardar y publicar
+        </button>
+        <span class="ml-3 text-sm text-tierra/60">Aplica todos los cambios de esta página.</span>
+      </div>
     </form>
   </section>
 </Layout>

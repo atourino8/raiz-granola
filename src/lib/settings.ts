@@ -77,7 +77,7 @@ export const defaultSettings: Record<string, string> = {
 export const settingLabels: Record<string, string> = {
   brand_name: 'Nombre de la marca',
   brand_emoji: 'Emoji/icono de la marca',
-  brand_favicon: 'Favicon propio (URL .png/.svg/.ico, opcional)',
+  brand_favicon: 'Favicon: el iconito que sale en la pestaña del navegador (opcional)',
   home_block_order: 'Orden de los bloques de la home',
   home_hero_badge: 'Etiqueta superior del hero',
   home_hero_title_1: 'Titular (línea 1)',
@@ -114,9 +114,9 @@ export const settingLabels: Record<string, string> = {
   nosotros_paso4_text: 'Paso 4 · texto',
   nosotros_compromiso_title: 'Compromiso · título',
   nosotros_compromiso_text: 'Compromiso · texto',
-  home_hero_image: 'Home · foto del hero (URL, opcional)',
-  home_story_image: 'Home · foto de la historia (URL, opcional)',
-  nosotros_compromiso_image: 'Nosotros · foto del compromiso (URL, opcional)',
+  home_hero_image: 'INICIO · foto principal grande de arriba (sustituye al bol 🥣)',
+  home_story_image: 'INICIO · foto de la sección «nuestra historia» (bloque verde)',
+  nosotros_compromiso_image: 'PÁGINA NOSOTROS · foto de «nuestro compromiso»',
   footer_tagline: 'Pie · descripción de la marca',
 };
 

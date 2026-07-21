@@ -22,9 +22,12 @@ const field =
       Subir imagen
       <input type="file" accept="image/*" data-upload class="hidden" />
     </label>
-    <span data-status class="text-xs text-tierra/60"></span>
+    <span data-status class="text-xs font-semibold text-tierra/60"></span>
   </div>
-  <input type="url" name={name} value={value} placeholder="https://… o sube un archivo" class={field} data-url />
+  <input type="url" name={name} value={value} placeholder="https://… o pulsa «Subir imagen»" class={field} data-url />
+  <p class="mt-1 text-xs text-tierra/50">
+    Sube una foto desde tu ordenador o pega un enlace. <strong>Después baja y pulsa «Guardar» para publicarla.</strong>
+  </p>
 </div>
 
 <script>
@@ -68,7 +71,10 @@ const field =
     const urlInput = box.querySelector('[data-url]') as HTMLInputElement | null;
     const preview = box.querySelector('[data-preview]') as HTMLImageElement | null;
 
-    if (status) status.textContent = 'Preparando…';
+    if (status) {
+      status.textContent = 'Preparando…';
+      status.className = 'text-xs font-semibold text-tierra/60';
+    }
     try {
       const blob = await prepareFile(file);
       if (blob.size > 4_000_000) {
@@ -92,9 +98,15 @@ const field =
         preview.src = data.url;
         preview.classList.remove('hidden');
       }
-      if (status) status.textContent = 'Subida ✓';
+      if (status) {
+        status.textContent = '✓ Subida — ahora pulsa «Guardar» abajo';
+        status.className = 'text-xs font-semibold text-bosque';
+      }
     } catch (err) {
-      if (status) status.textContent = err instanceof Error ? err.message : 'Error al subir';
+      if (status) {
+        status.textContent = err instanceof Error ? err.message : 'Error al subir';
+        status.className = 'text-xs font-semibold text-terracota';
+      }
     }
   });
 </script>
