@@ -15,7 +15,9 @@ function json(data: unknown, status = 200) {
 export const POST: APIRoute = async ({ request, locals }) => {
   if (!isVerifiedAdmin(locals.user)) return json({ error: 'No autorizado' }, 403);
 
-  const token = import.meta.env.BLOB_READ_WRITE_TOKEN;
+  const token =
+    import.meta.env.BLOB_READ_WRITE_TOKEN ||
+    (typeof process !== 'undefined' ? process.env.BLOB_READ_WRITE_TOKEN : undefined);
   if (!token) {
     return json(
       { error: 'Subida no configurada: falta BLOB_READ_WRITE_TOKEN. Usa una URL por ahora.' },
@@ -36,6 +38,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return json({ url: blob.url });
   } catch (err) {
     console.error('[upload]', err);
-    return json({ error: 'No se pudo subir la imagen.' }, 500);
+    const msg = err instanceof Error ? err.message : 'error desconocido';
+    return json({ error: 'No se pudo subir la imagen: ' + msg }, 500);
   }
 };
