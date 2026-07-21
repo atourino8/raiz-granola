@@ -23,6 +23,7 @@ interface ImportMetaEnv {
   readonly ADMIN_EMAILS?: string;
   readonly RESEND_API_KEY?: string;
   readonly EMAIL_FROM?: string;
+  readonly BLOB_READ_WRITE_TOKEN?: string;
 }
 
 interface ImportMeta {

@@ -113,6 +113,7 @@ Añádelas **en el proyecto** (Settings → Environment Variables), marcadas par
 | `ADMIN_EMAILS` | Tu email y el de tu socia (separados por comas) para entrar en /admin |
 | `RESEND_API_KEY` | Clave de Resend (resend.com) para enviar verificación y reset |
 | `EMAIL_FROM` | Remitente, ej. `Raíz Granola <onboarding@resend.dev>` |
+| `BLOB_READ_WRITE_TOKEN` | Subida de imágenes. Se crea solo al añadir un **Blob store** en Vercel (Storage → Create → Blob) |
 
 Genera `SESSION_SECRET` en PowerShell:
 

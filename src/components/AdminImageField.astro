@@ -1,0 +1,61 @@
+---
+interface Props {
+  name: string;
+  label: string;
+  value?: string;
+}
+const { name, label, value = '' } = Astro.props;
+const field =
+  'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.5 focus:border-miel focus:outline-none';
+---
+
+<div data-image-field>
+  <label class="text-sm font-semibold text-tierra">{label}</label>
+  <div class="mt-1 flex items-center gap-3">
+    <img
+      data-preview
+      src={value}
+      alt=""
+      class:list={['h-14 w-14 rounded-lg border border-avena/60 object-cover', !value && 'hidden']}
+    />
+    <label class="cursor-pointer rounded-full border border-bosque/30 px-4 py-2 text-sm font-semibold text-bosque transition hover:bg-bosque/10">
+      Subir imagen
+      <input type="file" accept="image/*" data-upload class="hidden" />
+    </label>
+    <span data-status class="text-xs text-tierra/60"></span>
+  </div>
+  <input type="url" name={name} value={value} placeholder="https://… o sube un archivo" class={field} data-url />
+</div>
+
+<script>
+  document.addEventListener('change', async (e) => {
+    const input = e.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    if (input.type !== 'file' || !input.hasAttribute('data-upload')) return;
+    const box = input.closest('[data-image-field]');
+    if (!box) return;
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const status = box.querySelector('[data-status]') as HTMLElement | null;
+    const urlInput = box.querySelector('[data-url]') as HTMLInputElement | null;
+    const preview = box.querySelector('[data-preview]') as HTMLImageElement | null;
+
+    if (status) status.textContent = 'Subiendo…';
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al subir');
+      if (urlInput) urlInput.value = data.url;
+      if (preview) {
+        preview.src = data.url;
+        preview.classList.remove('hidden');
+      }
+      if (status) status.textContent = 'Subida ✓';
+    } catch (err) {
+      if (status) status.textContent = err instanceof Error ? err.message : 'Error al subir';
+    }
+  });
+</script>

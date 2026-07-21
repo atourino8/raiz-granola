@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { isVerifiedAdmin } from '../../lib/admin';
 import { getAllSettings, settingLabels, settingGroups } from '../../lib/settings';
+import AdminImageField from '../../components/AdminImageField.astro';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/login?next=' + encodeURIComponent(Astro.url.pathname));
@@ -28,12 +29,16 @@ const field =
           <div>
             <h2 class="font-serif text-xl font-semibold text-tierra">{group.title}</h2>
             <div class="mt-4 space-y-4">
-              {group.keys.map((k) => (
-                <div>
-                  <label class="text-sm font-semibold text-tierra">{settingLabels[k]}</label>
-                  <textarea name={k} rows="2" class={field}>{settings[k]}</textarea>
-                </div>
-              ))}
+              {group.keys.map((k) =>
+                k.endsWith('_image') || k === 'brand_favicon' ? (
+                  <AdminImageField name={k} label={settingLabels[k]} value={settings[k]} />
+                ) : (
+                  <div>
+                    <label class="text-sm font-semibold text-tierra">{settingLabels[k]}</label>
+                    <textarea name={k} rows="2" class={field}>{settings[k]}</textarea>
+                  </div>
+                ),
+              )}
             </div>
           </div>
         ))

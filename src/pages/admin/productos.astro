@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import { isVerifiedAdmin } from '../../lib/admin';
 import { getAllProductsAdmin } from '../../lib/catalog';
 import { formatPrice } from '../../lib/products';
+import AdminImageField from '../../components/AdminImageField.astro';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/login?next=' + encodeURIComponent(Astro.url.pathname));
@@ -127,8 +128,7 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
           <input name="color" type="text" value={editing?.color ?? '#C99A3F'} class={field} placeholder="#C99A3F" />
         </div>
         <div class="sm:col-span-2">
-          <label class="text-sm font-semibold text-tierra">URL de imagen (opcional)</label>
-          <input name="imageUrl" type="url" value={editing?.imageUrl ?? ''} class={field} placeholder="https://..." />
+          <AdminImageField name="imageUrl" label="Imagen del producto (sube un archivo o pega una URL)" value={editing?.imageUrl ?? ''} />
         </div>
         <div>
           <label class="text-sm font-semibold text-tierra">Orden</label>
