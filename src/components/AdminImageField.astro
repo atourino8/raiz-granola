@@ -28,6 +28,33 @@ const field =
 </div>
 
 <script>
+  // Redimensiona imágenes grandes en el navegador (evita el límite de subida
+  // y hace que carguen más rápido). SVG/GIF se dejan tal cual.
+  async function prepareFile(file: File): Promise<Blob> {
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) return file;
+    const MAX = 1600;
+    let bitmap: ImageBitmap | null = null;
+    try {
+      bitmap = await createImageBitmap(file);
+    } catch {
+      return file;
+    }
+    const { width, height } = bitmap;
+    if (width <= MAX && height <= MAX && file.size < 1_000_000) return file;
+    const scale = Math.min(1, MAX / Math.max(width, height));
+    const w = Math.round(width * scale);
+    const h = Math.round(height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, outType, 0.85));
+    return blob || file;
+  }
+
   document.addEventListener('change', async (e) => {
     const input = e.target;
     if (!(input instanceof HTMLInputElement)) return;
@@ -41,15 +68,27 @@ const field =
     const urlInput = box.querySelector('[data-url]') as HTMLInputElement | null;
     const preview = box.querySelector('[data-preview]') as HTMLImageElement | null;
 
-    if (status) status.textContent = 'Subiendo…';
+    if (status) status.textContent = 'Preparando…';
     try {
+      const blob = await prepareFile(file);
+      if (blob.size > 4_000_000) {
+        if (status) status.textContent = 'La imagen es muy grande (máx 4 MB).';
+        return;
+      }
+      if (status) status.textContent = 'Subiendo…';
       const fd = new FormData();
-      fd.append('file', file);
+      fd.append('file', blob, file.name);
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al subir');
-      if (urlInput) urlInput.value = data.url;
-      if (preview) {
+      const text = await res.text();
+      let data: { url?: string; error?: string } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { error: text.slice(0, 120) || `Error ${res.status}` };
+      }
+      if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+      if (urlInput && data.url) urlInput.value = data.url;
+      if (preview && data.url) {
         preview.src = data.url;
         preview.classList.remove('hidden');
       }

@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const file = data.get('file');
   if (!(file instanceof File)) return json({ error: 'No se recibió ningún archivo.' }, 400);
   if (!file.type.startsWith('image/')) return json({ error: 'El archivo debe ser una imagen.' }, 400);
-  if (file.size > 5 * 1024 * 1024) return json({ error: 'La imagen no puede superar 5 MB.' }, 400);
+  if (file.size > 4 * 1024 * 1024) return json({ error: 'La imagen no puede superar 4 MB.' }, 400);
 
   try {
     const ext = (file.name.split('.').pop() || 'img').toLowerCase().replace(/[^a-z0-9]/g, '') || 'img';
