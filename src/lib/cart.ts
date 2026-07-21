@@ -6,6 +6,7 @@ export interface CartItem {
   name: string;
   price: number; // céntimos
   emoji: string;
+  image?: string;
   qty: number;
 }
 

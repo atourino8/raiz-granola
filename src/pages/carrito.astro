@@ -70,7 +70,7 @@ import Layout from '../layouts/Layout.astro';
       .map(
         (it) => `
       <div class="flex items-center gap-4 rounded-2xl border border-avena/50 bg-white/70 p-4">
-        <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-arena text-3xl">${it.emoji}</div>
+        <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-arena text-3xl">${it.image ? `<img src="${it.image}" alt="" class="h-full w-full object-cover">` : it.emoji}</div>
         <div class="flex-1">
           <p class="font-serif font-semibold text-tierra">${it.name}</p>
           <p class="text-sm text-tierra/60">${formatPrice(it.price)}</p>

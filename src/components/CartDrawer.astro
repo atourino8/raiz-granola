@@ -98,7 +98,7 @@
         .map(
           (it) => `
         <div class="flex items-center gap-3 rounded-2xl border border-avena/50 bg-white/70 p-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-arena text-2xl">${it.emoji}</div>
+          <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-arena text-2xl">${it.image ? `<img src="${it.image}" alt="" class="h-full w-full object-cover">` : it.emoji}</div>
           <div class="flex-1">
             <p class="text-sm font-semibold text-tierra">${it.name}</p>
             <p class="text-xs text-tierra/60">${formatPrice(it.price)}</p>
