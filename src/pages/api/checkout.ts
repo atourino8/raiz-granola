@@ -26,8 +26,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     for (const it of items) {
       const product = await getProductBySlug(it.slug);
-      const qty = Math.max(1, Math.min(50, Number(it.qty) || 1));
       if (!product) continue;
+      // Stock: -1 = ilimitado; 0 = agotado (se omite); >0 = no vender más que las unidades.
+      if (product.stock === 0) continue;
+      let qty = Math.max(1, Math.min(50, Number(it.qty) || 1));
+      if (product.stock > 0) qty = Math.min(qty, product.stock);
       amountTotal += product.price * qty;
       summary.push({ slug: product.slug, qty });
       lineItems.push({
@@ -44,7 +47,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     if (lineItems.length === 0) {
-      return json({ error: 'No hay productos válidos en la cesta' }, 400);
+      return json({ error: 'No hay productos disponibles en la cesta' }, 400);
     }
 
     const site = import.meta.env.PUBLIC_SITE_URL || new URL(request.url).origin;
@@ -81,9 +84,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     await ensureSchema();
     await db.execute({
-      sql: `INSERT INTO orders (user_id, stripe_session_id, amount_total, status, items_json)
-            VALUES (?, ?, ?, 'pending', ?)`,
-      args: [locals.user?.id ?? null, session.id, amountTotal, JSON.stringify(summary)],
+      sql: `INSERT INTO orders (user_id, stripe_session_id, amount_total, status, items_json, customer_email)
+            VALUES (?, ?, ?, 'pending', ?, ?)`,
+      args: [
+        locals.user?.id ?? null,
+        session.id,
+        amountTotal,
+        JSON.stringify(summary),
+        locals.user?.email ?? null,
+      ],
     });
 
     return json({ url: session.url });

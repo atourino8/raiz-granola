@@ -9,9 +9,14 @@ const user = Astro.locals.user;
 if (!user) return Astro.redirect('/login?next=' + encodeURIComponent(Astro.url.pathname));
 if (!isVerifiedAdmin(user)) return Astro.redirect('/');
 
-const products = await getAllProductsAdmin();
+const allProducts = await getAllProductsAdmin();
+const q = (Astro.url.searchParams.get('q') || '').trim().toLowerCase();
+const products = q
+  ? allProducts.filter((p) => p.name.toLowerCase().includes(q) || p.slug.includes(q))
+  : allProducts;
+
 const editSlug = Astro.url.searchParams.get('edit');
-const editing = editSlug ? products.find((p) => p.slug === editSlug) ?? null : null;
+const editing = editSlug ? allProducts.find((p) => p.slug === editSlug) ?? null : null;
 const saved = Astro.url.searchParams.get('saved');
 const errorMap: Record<string, string> = {
   slug: 'El identificador (slug) no es válido.',
@@ -21,7 +26,14 @@ const errorMap: Record<string, string> = {
 const errorCode = Astro.url.searchParams.get('error');
 const errorMsg = errorCode ? (errorMap[errorCode] ?? 'Revisa los datos introducidos.') : null;
 
-const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.5 focus:border-miel focus:outline-none';
+const field =
+  'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.5 focus:border-miel focus:outline-none';
+
+function stockLabel(n: number): string {
+  if (n < 0) return 'Ilimitado';
+  if (n === 0) return 'Agotado';
+  return String(n);
+}
 ---
 
 <Layout title="Productos — Admin">
@@ -34,13 +46,24 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
     {saved && <p class="mt-4 rounded-lg bg-musgo/15 px-4 py-2 text-sm text-bosque">Cambios guardados.</p>}
     {errorMsg && <p class="mt-4 rounded-lg bg-terracota/10 px-4 py-2 text-sm text-terracota">{errorMsg}</p>}
 
-    <!-- Listado -->
-    <div class="mt-6 overflow-hidden rounded-organic border border-avena/50 bg-white/70">
+    <form method="GET" class="mt-6">
+      <input
+        type="search"
+        name="q"
+        value={q}
+        placeholder="Buscar producto por nombre o slug…"
+        class="w-full rounded-full border border-avena/70 bg-crema px-5 py-2.5 text-sm focus:border-miel focus:outline-none"
+      />
+    </form>
+
+    <div class="mt-4 overflow-hidden rounded-organic border border-avena/50 bg-white/70">
       <table class="w-full text-left text-sm">
         <thead class="bg-arena/50 text-tierra/70">
           <tr>
+            <th class="px-4 py-3">Orden</th>
             <th class="px-4 py-3">Producto</th>
             <th class="px-4 py-3">Precio</th>
+            <th class="px-4 py-3">Stock</th>
             <th class="px-4 py-3">Estado</th>
             <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
@@ -50,16 +73,39 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
             products.map((p) => (
               <tr class="border-t border-avena/40">
                 <td class="px-4 py-3">
+                  <div class="flex gap-1">
+                    <form method="POST" action="/api/admin/product-quick">
+                      <input type="hidden" name="action" value="move" />
+                      <input type="hidden" name="dir" value="up" />
+                      <input type="hidden" name="slug" value={p.slug} />
+                      <button class="rounded px-1.5 text-tierra/60 hover:bg-bosque/10" aria-label="Subir">↑</button>
+                    </form>
+                    <form method="POST" action="/api/admin/product-quick">
+                      <input type="hidden" name="action" value="move" />
+                      <input type="hidden" name="dir" value="down" />
+                      <input type="hidden" name="slug" value={p.slug} />
+                      <button class="rounded px-1.5 text-tierra/60 hover:bg-bosque/10" aria-label="Bajar">↓</button>
+                    </form>
+                  </div>
+                </td>
+                <td class="px-4 py-3">
                   <span class="mr-2">{p.emoji}</span>
                   <span class="font-semibold text-tierra">{p.name}</span>
                   {p.featured && <span class="ml-2 rounded-full bg-miel/20 px-2 py-0.5 text-[11px] font-semibold text-terracota">destacado</span>}
                 </td>
                 <td class="px-4 py-3 text-tierra/80">{formatPrice(p.price)}</td>
                 <td class="px-4 py-3">
-                  {p.active ? <span class="text-bosque">Activo</span> : <span class="text-tierra/40">Oculto</span>}
+                  <span class:list={[p.stock === 0 ? 'text-terracota' : 'text-tierra/70']}>{stockLabel(p.stock)}</span>
                 </td>
+                <td class="px-4 py-3">{p.active ? <span class="text-bosque">Activo</span> : <span class="text-tierra/40">Oculto</span>}</td>
                 <td class="px-4 py-3">
                   <div class="flex items-center justify-end gap-3">
+                    <form method="POST" action="/api/admin/product-quick">
+                      <input type="hidden" name="action" value="toggle" />
+                      <input type="hidden" name="slug" value={p.slug} />
+                      <input type="hidden" name="active" value={p.active ? '0' : '1'} />
+                      <button class="font-semibold text-tierra/60 hover:text-miel">{p.active ? 'Ocultar' : 'Activar'}</button>
+                    </form>
                     <a href={`/admin/productos?edit=${p.slug}`} class="font-semibold text-miel hover:text-terracota">Editar</a>
                     <form method="POST" action="/api/admin/product" data-confirm="¿Borrar este producto?">
                       <input type="hidden" name="action" value="delete" />
@@ -75,7 +121,6 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
       </table>
     </div>
 
-    <!-- Formulario crear / editar -->
     <div class="mt-10 rounded-organic border border-avena/50 bg-white/70 p-6 shadow-suave">
       <div class="flex items-center justify-between">
         <h2 class="font-serif text-2xl font-semibold text-tierra">
@@ -111,6 +156,14 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
           <label class="text-sm font-semibold text-tierra">Peso / formato</label>
           <input name="weight" value={editing?.weight ?? ''} class={field} placeholder="400 g" />
         </div>
+        <div>
+          <label class="text-sm font-semibold text-tierra">Stock (unidades; vacío o -1 = ilimitado)</label>
+          <input name="stock" type="number" step="1" value={editing ? String(editing.stock) : '-1'} class={field} />
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-tierra">Orden</label>
+          <input name="sortOrder" type="number" value={editing?.sortOrder ?? 99} class={field} />
+        </div>
         <div class="sm:col-span-2">
           <label class="text-sm font-semibold text-tierra">Ingredientes (uno por línea)</label>
           <textarea name="ingredients" rows="3" class={field}>{editing?.ingredients.join('\n') ?? ''}</textarea>
@@ -129,10 +182,6 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
         </div>
         <div class="sm:col-span-2">
           <AdminImageField name="imageUrl" label="Imagen del producto (sube un archivo o pega una URL)" value={editing?.imageUrl ?? ''} />
-        </div>
-        <div>
-          <label class="text-sm font-semibold text-tierra">Orden</label>
-          <input name="sortOrder" type="number" value={editing?.sortOrder ?? 99} class={field} />
         </div>
         <div class="flex items-end gap-6">
           <label class="flex items-center gap-2 text-sm font-semibold text-tierra">
@@ -153,7 +202,6 @@ const field = 'mt-1 w-full rounded-xl border border-avena/70 bg-crema px-4 py-2.
 </Layout>
 
 <script>
-  // Confirmación de borrado sin JS inline (compatible con CSP estricta).
   document.querySelectorAll('form[data-confirm]').forEach((form) => {
     form.addEventListener('submit', (e) => {
       if (!confirm(form.getAttribute('data-confirm') || '¿Seguro?')) e.preventDefault();

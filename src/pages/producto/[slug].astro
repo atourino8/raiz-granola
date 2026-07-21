@@ -71,29 +71,37 @@ const productSchema = {
           <span class="text-sm text-tierra/50">{product.weight}</span>
         </div>
 
-        <div class="mt-5 flex flex-wrap items-center gap-3">
-          <div class="flex items-center rounded-full border border-avena/70">
-            <button class="px-4 py-2 text-lg text-tierra/70 hover:text-miel" data-qty-dec aria-label="Menos">−</button>
-            <input
-              data-qty-input
-              type="number"
-              min="1"
-              value="1"
-              class="w-12 border-0 bg-transparent text-center font-semibold focus:outline-none"
-            />
-            <button class="px-4 py-2 text-lg text-tierra/70 hover:text-miel" data-qty-inc aria-label="Más">+</button>
-          </div>
-          <button
-            class="flex-1 rounded-full bg-miel px-8 py-3.5 font-bold text-tierra transition hover:bg-terracota hover:text-crema"
-            data-add
-            data-slug={product.slug}
-            data-name={product.name}
-            data-price={product.price}
-            data-emoji={product.emoji}
-          >
-            Añadir a la cesta
-          </button>
-        </div>
+        {
+          product.stock === 0 ? (
+            <div class="mt-5 rounded-full bg-avena/50 px-6 py-3.5 text-center font-bold text-tierra/60">
+              Agotado por ahora
+            </div>
+          ) : (
+            <div class="mt-5 flex flex-wrap items-center gap-3">
+              <div class="flex items-center rounded-full border border-avena/70">
+                <button class="px-4 py-2 text-lg text-tierra/70 hover:text-miel" data-qty-dec aria-label="Menos">−</button>
+                <input
+                  data-qty-input
+                  type="number"
+                  min="1"
+                  value="1"
+                  class="w-12 border-0 bg-transparent text-center font-semibold focus:outline-none"
+                />
+                <button class="px-4 py-2 text-lg text-tierra/70 hover:text-miel" data-qty-inc aria-label="Más">+</button>
+              </div>
+              <button
+                class="flex-1 rounded-full bg-miel px-8 py-3.5 font-bold text-tierra transition hover:bg-terracota hover:text-crema"
+                data-add
+                data-slug={product.slug}
+                data-name={product.name}
+                data-price={product.price}
+                data-emoji={product.emoji}
+              >
+                Añadir a la cesta
+              </button>
+            </div>
+          )
+        }
 
         <p class="mt-4 text-sm text-tierra/60">🚚 Envío en 24-48 h · Devolución sencilla</p>
       </div>

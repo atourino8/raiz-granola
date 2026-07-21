@@ -10,11 +10,37 @@ if (!user) return Astro.redirect('/login?next=' + encodeURIComponent(Astro.url.p
 if (!isVerifiedAdmin(user)) return Astro.redirect('/');
 
 await ensureSchema();
-const res = await db.execute(
-  `SELECT o.id, o.amount_total, o.status, o.items_json, o.created_at, u.email AS user_email
-   FROM orders o LEFT JOIN users u ON u.id = o.user_id
-   ORDER BY o.created_at DESC LIMIT 100`,
-);
+
+const statuses = ['pending', 'paid', 'fulfilled', 'cancelled'];
+const label: Record<string, string> = {
+  pending: 'Pendiente',
+  paid: 'Pagado',
+  fulfilled: 'Enviado',
+  cancelled: 'Cancelado',
+};
+
+const estado = Astro.url.searchParams.get('estado') || '';
+const filterOk = statuses.includes(estado);
+const page = Math.max(1, parseInt(Astro.url.searchParams.get('page') || '1', 10) || 1);
+const perPage = 20;
+const offset = (page - 1) * perPage;
+
+const where = filterOk ? 'WHERE o.status = ?' : '';
+const countRes = await db.execute({
+  sql: `SELECT COUNT(*) AS n FROM orders o ${where}`,
+  args: filterOk ? [estado] : [],
+});
+const totalCount = Number(countRes.rows[0].n);
+const totalPages = Math.max(1, Math.ceil(totalCount / perPage));
+
+const res = await db.execute({
+  sql: `SELECT o.id, o.amount_total, o.status, o.items_json, o.created_at,
+               COALESCE(o.customer_email, u.email) AS email
+        FROM orders o LEFT JOIN users u ON u.id = o.user_id
+        ${where}
+        ORDER BY o.created_at DESC LIMIT ? OFFSET ?`,
+  args: filterOk ? [estado, perPage, offset] : [perPage, offset],
+});
 
 const products = await getAllProductsAdmin();
 const nameBySlug: Record<string, string> = {};
@@ -24,21 +50,16 @@ const orders = res.rows.map((r) => ({
   id: Number(r.id),
   total: Number(r.amount_total),
   status: String(r.status),
-  email: r.user_email ? String(r.user_email) : '—',
+  email: r.email ? String(r.email) : '—',
   date: String(r.created_at),
   items: (JSON.parse(String(r.items_json)) as Array<{ slug: string; qty: number }>).map(
     (it) => `${nameBySlug[it.slug] ?? it.slug} ×${it.qty}`,
   ),
 }));
 
-const statuses = ['pending', 'paid', 'fulfilled', 'cancelled'];
-const label: Record<string, string> = {
-  pending: 'Pendiente',
-  paid: 'Pagado',
-  fulfilled: 'Enviado',
-  cancelled: 'Cancelado',
-};
 const saved = Astro.url.searchParams.get('saved');
+const qp = (obj: Record<string, string | number>) =>
+  '?' + Object.entries(obj).filter(([, v]) => v !== '' && v != null).map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&');
 ---
 
 <Layout title="Pedidos — Admin">
@@ -50,9 +71,20 @@ const saved = Astro.url.searchParams.get('saved');
 
     {saved && <p class="mt-4 rounded-lg bg-musgo/15 px-4 py-2 text-sm text-bosque">Estado actualizado.</p>}
 
+    <div class="mt-6 flex flex-wrap gap-2 text-sm">
+      <a href="/admin/pedidos" class:list={['rounded-full px-3 py-1.5 font-semibold', !filterOk ? 'bg-bosque text-crema' : 'border border-avena/70 text-tierra/70 hover:bg-bosque/10']}>Todos</a>
+      {
+        statuses.map((st) => (
+          <a href={`/admin/pedidos?estado=${st}`} class:list={['rounded-full px-3 py-1.5 font-semibold', estado === st ? 'bg-bosque text-crema' : 'border border-avena/70 text-tierra/70 hover:bg-bosque/10']}>
+            {label[st]}
+          </a>
+        ))
+      }
+    </div>
+
     {
       orders.length === 0 ? (
-        <p class="mt-8 text-tierra/70">Todavía no hay pedidos.</p>
+        <p class="mt-8 text-tierra/70">No hay pedidos{filterOk ? ` con estado "${label[estado]}"` : ''}.</p>
       ) : (
         <div class="mt-6 space-y-4">
           {orders.map((o) => (
@@ -66,8 +98,8 @@ const saved = Astro.url.searchParams.get('saved');
                 <form method="POST" action="/api/admin/order-status" class="flex items-center gap-2">
                   <input type="hidden" name="id" value={o.id} />
                   <select name="status" class="rounded-lg border border-avena/70 bg-crema px-3 py-2 text-sm">
-                    {statuses.map((s) => (
-                      <option value={s} selected={s === o.status}>{label[s]}</option>
+                    {statuses.map((st) => (
+                      <option value={st} selected={st === o.status}>{label[st]}</option>
                     ))}
                   </select>
                   <button class="rounded-full bg-bosque px-4 py-2 text-sm font-semibold text-crema hover:bg-musgo">Guardar</button>
@@ -75,6 +107,16 @@ const saved = Astro.url.searchParams.get('saved');
               </div>
             </div>
           ))}
+        </div>
+      )
+    }
+
+    {
+      totalPages > 1 && (
+        <div class="mt-8 flex items-center justify-center gap-3 text-sm">
+          {page > 1 && <a class="rounded-full border border-avena/70 px-4 py-2 font-semibold text-bosque hover:bg-bosque/10" href={qp({ estado, page: page - 1 })}>← Anteriores</a>}
+          <span class="text-tierra/60">Página {page} de {totalPages}</span>
+          {page < totalPages && <a class="rounded-full border border-avena/70 px-4 py-2 font-semibold text-bosque hover:bg-bosque/10" href={qp({ estado, page: page + 1 })}>Siguientes →</a>}
         </div>
       )
     }

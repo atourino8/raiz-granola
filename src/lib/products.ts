@@ -18,6 +18,7 @@ export interface Product {
   featured: boolean;
   active: boolean;
   sortOrder: number;
+  stock: number; // -1 = ilimitado
 }
 
 export function formatPrice(cents: number): string {
@@ -41,6 +42,7 @@ export const seedProducts: Product[] = [
     featured: true,
     active: true,
     sortOrder: 1,
+    stock: -1,
   },
   {
     slug: 'cacao-avellana',
@@ -58,6 +60,7 @@ export const seedProducts: Product[] = [
     featured: true,
     active: true,
     sortOrder: 2,
+    stock: -1,
   },
   {
     slug: 'frutos-rojos',
@@ -75,6 +78,7 @@ export const seedProducts: Product[] = [
     featured: true,
     active: true,
     sortOrder: 3,
+    stock: -1,
   },
   {
     slug: 'proteica-cacahuete',
@@ -92,6 +96,7 @@ export const seedProducts: Product[] = [
     featured: false,
     active: true,
     sortOrder: 4,
+    stock: -1,
   },
   {
     slug: 'jengibre-manzana',
@@ -109,6 +114,7 @@ export const seedProducts: Product[] = [
     featured: false,
     active: true,
     sortOrder: 5,
+    stock: -1,
   },
   {
     slug: 'caja-degustacion',
@@ -126,5 +132,6 @@ export const seedProducts: Product[] = [
     featured: true,
     active: true,
     sortOrder: 6,
+    stock: -1,
   },
 ];

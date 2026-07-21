@@ -6,6 +6,7 @@ interface Props {
   product: Product;
 }
 const { product } = Astro.props;
+const agotado = product.stock === 0;
 ---
 
 <article
@@ -28,6 +29,7 @@ const { product } = Astro.props;
         )
       }
       <div class="absolute left-4 top-4 flex flex-wrap gap-1.5">
+        {agotado && <span class="rounded-full bg-tierra/80 px-2.5 py-1 text-[11px] font-semibold text-crema">Agotado</span>}
         {
           product.tags.slice(0, 2).map((t) => (
             <span class="rounded-full bg-crema/90 px-2.5 py-1 text-[11px] font-semibold text-bosque">
@@ -48,16 +50,22 @@ const { product } = Astro.props;
 
     <div class="mt-auto flex items-center justify-between pt-4">
       <span class="font-serif text-lg font-semibold text-bosque">{formatPrice(product.price)}</span>
-      <button
-        class="rounded-full bg-miel px-4 py-2 text-sm font-bold text-tierra transition hover:bg-terracota hover:text-crema"
-        data-add
-        data-slug={product.slug}
-        data-name={product.name}
-        data-price={product.price}
-        data-emoji={product.emoji}
-      >
-        Añadir
-      </button>
+      {
+        agotado ? (
+          <span class="rounded-full bg-avena/60 px-4 py-2 text-sm font-bold text-tierra/50">Agotado</span>
+        ) : (
+          <button
+            class="rounded-full bg-miel px-4 py-2 text-sm font-bold text-tierra transition hover:bg-terracota hover:text-crema"
+            data-add
+            data-slug={product.slug}
+            data-name={product.name}
+            data-price={product.price}
+            data-emoji={product.emoji}
+          >
+            Añadir
+          </button>
+        )
+      }
     </div>
   </div>
 </article>

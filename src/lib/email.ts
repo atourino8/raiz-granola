@@ -58,6 +58,18 @@ export function sendVerificationEmail(to: string, url: string): Promise<boolean>
   );
 }
 
+export function sendOrderShippedEmail(to: string, orderId: number, site: string): Promise<boolean> {
+  return send(
+    to,
+    `Tu pedido #${orderId} va en camino · Raíz Granola`,
+    wrap(
+      '¡Tu pedido va en camino! 📦',
+      `Hemos preparado y enviado tu pedido #${orderId}. Gracias por confiar en nosotros.`,
+      { href: `${site}/cuenta`, label: 'Ver mis pedidos' },
+    ),
+  );
+}
+
 export function sendPasswordResetEmail(to: string, url: string): Promise<boolean> {
   return send(
     to,

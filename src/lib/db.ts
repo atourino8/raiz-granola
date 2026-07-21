@@ -60,6 +60,7 @@ export async function ensureSchema(): Promise<void> {
         currency TEXT NOT NULL DEFAULT 'eur',
         status TEXT NOT NULL DEFAULT 'pending',
         items_json TEXT NOT NULL,
+        customer_email TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       )`,
       `CREATE TABLE IF NOT EXISTS products (
@@ -78,6 +79,7 @@ export async function ensureSchema(): Promise<void> {
         featured INTEGER NOT NULL DEFAULT 0,
         active INTEGER NOT NULL DEFAULT 1,
         sort_order INTEGER NOT NULL DEFAULT 0,
+        stock INTEGER NOT NULL DEFAULT -1,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       )`,
       `CREATE TABLE IF NOT EXISTS settings (
@@ -103,6 +105,16 @@ export async function ensureSchema(): Promise<void> {
     await db.execute('ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0');
   } catch {
     // la columna ya existe: ignorar
+  }
+  try {
+    await db.execute('ALTER TABLE products ADD COLUMN stock INTEGER NOT NULL DEFAULT -1');
+  } catch {
+    /* ya existe */
+  }
+  try {
+    await db.execute('ALTER TABLE orders ADD COLUMN customer_email TEXT');
+  } catch {
+    /* ya existe */
   }
 
   initialised = true;

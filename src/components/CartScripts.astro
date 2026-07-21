@@ -1,31 +1,9 @@
 ---
-// Comportamiento global del carrito: enlaza cualquier botón [data-add]
-// y muestra un pequeño aviso al añadir. Se incluye una vez en el Layout.
+// Comportamiento global "añadir a la cesta": enlaza cualquier botón [data-add]
+// y abre el mini-carrito lateral. Se incluye una vez en el Layout.
 ---
-
-<div
-  id="toast"
-  class="pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2 translate-y-4 rounded-full bg-bosque px-5 py-3 text-sm font-semibold text-crema opacity-0 shadow-suave transition-all"
->
-</div>
-
 <script>
   import { addToCart } from '../lib/cart';
-
-  const toast = document.getElementById('toast');
-  let timer: ReturnType<typeof setTimeout>;
-
-  function showToast(msg: string) {
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.style.opacity = '1';
-    toast.style.transform = 'translate(-50%, 0)';
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translate(-50%, 1rem)';
-    }, 1800);
-  }
 
   document.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement)?.closest('[data-add]') as HTMLElement | null;
@@ -41,6 +19,6 @@
       },
       qty,
     );
-    showToast(`${btn.dataset.name} añadida a la cesta`);
+    document.dispatchEvent(new CustomEvent('raiz:cart-open'));
   });
 </script>

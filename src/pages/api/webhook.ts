@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getStripe } from '../../lib/stripe';
-import { db, ensureSchema } from '../../lib/db';
+import { markOrderPaid } from '../../lib/orders';
 
 export const prerender = false;
 
@@ -25,12 +25,8 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as { id: string };
-    await ensureSchema();
-    await db.execute({
-      sql: `UPDATE orders SET status = 'paid' WHERE stripe_session_id = ?`,
-      args: [session.id],
-    });
+    const session = event.data.object as { id: string; customer_details?: { email?: string } };
+    await markOrderPaid(session.id, session.customer_details?.email ?? null);
   }
 
   return new Response('ok', { status: 200 });

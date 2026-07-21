@@ -13,12 +13,12 @@ async function ensureSeed(): Promise<void> {
     for (const p of seedProducts) {
       await db.execute({
         sql: `INSERT INTO products
-          (slug, name, tagline, description, price, weight, ingredients, tags, emoji, color, image_url, featured, active, sort_order)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (slug, name, tagline, description, price, weight, ingredients, tags, emoji, color, image_url, featured, active, sort_order, stock)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           p.slug, p.name, p.tagline, p.description, p.price, p.weight,
           JSON.stringify(p.ingredients), JSON.stringify(p.tags),
-          p.emoji, p.color, p.imageUrl, p.featured ? 1 : 0, p.active ? 1 : 0, p.sortOrder,
+          p.emoji, p.color, p.imageUrl, p.featured ? 1 : 0, p.active ? 1 : 0, p.sortOrder, p.stock,
         ],
       });
     }
@@ -53,6 +53,7 @@ function toProduct(row: Row): Product {
     featured: Number(row.featured) === 1,
     active: Number(row.active) === 1,
     sortOrder: Number(row.sort_order ?? 0),
+    stock: row.stock === null || row.stock === undefined ? -1 : Number(row.stock),
   };
 }
 
@@ -106,14 +107,15 @@ export interface ProductInput {
   featured: boolean;
   active: boolean;
   sortOrder: number;
+  stock: number;
 }
 
 export async function upsertProduct(p: ProductInput): Promise<void> {
   await ensureSeed();
   await db.execute({
     sql: `INSERT INTO products
-      (slug, name, tagline, description, price, weight, ingredients, tags, emoji, color, image_url, featured, active, sort_order)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (slug, name, tagline, description, price, weight, ingredients, tags, emoji, color, image_url, featured, active, sort_order, stock)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(slug) DO UPDATE SET
         name = excluded.name,
         tagline = excluded.tagline,
@@ -127,11 +129,12 @@ export async function upsertProduct(p: ProductInput): Promise<void> {
         image_url = excluded.image_url,
         featured = excluded.featured,
         active = excluded.active,
-        sort_order = excluded.sort_order`,
+        sort_order = excluded.sort_order,
+        stock = excluded.stock`,
     args: [
       p.slug, p.name, p.tagline, p.description, p.price, p.weight,
       JSON.stringify(p.ingredients), JSON.stringify(p.tags),
-      p.emoji, p.color, p.imageUrl, p.featured ? 1 : 0, p.active ? 1 : 0, p.sortOrder,
+      p.emoji, p.color, p.imageUrl, p.featured ? 1 : 0, p.active ? 1 : 0, p.sortOrder, p.stock,
     ],
   });
 }
@@ -139,4 +142,39 @@ export async function upsertProduct(p: ProductInput): Promise<void> {
 export async function deleteProductBySlug(slug: string): Promise<void> {
   await ensureSeed();
   await db.execute({ sql: 'DELETE FROM products WHERE slug = ?', args: [slug] });
+}
+
+// Activa o desactiva un producto.
+export async function setProductActive(slug: string, active: boolean): Promise<void> {
+  await ensureSeed();
+  await db.execute({ sql: 'UPDATE products SET active = ? WHERE slug = ?', args: [active ? 1 : 0, slug] });
+}
+
+// Mueve un producto arriba/abajo intercambiando su sort_order con el vecino.
+export async function moveProduct(slug: string, dir: 'up' | 'down'): Promise<void> {
+  await ensureSeed();
+  const all = await getAllProductsAdmin();
+  const idx = all.findIndex((p) => p.slug === slug);
+  if (idx === -1) return;
+  const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= all.length) return;
+  const a = all[idx];
+  const b = all[swapIdx];
+  // Intercambia sort_order (usa el índice como fallback si empatan).
+  const aOrder = a.sortOrder === b.sortOrder ? idx : a.sortOrder;
+  const bOrder = a.sortOrder === b.sortOrder ? swapIdx : b.sortOrder;
+  await db.execute({ sql: 'UPDATE products SET sort_order = ? WHERE slug = ?', args: [bOrder, a.slug] });
+  await db.execute({ sql: 'UPDATE products SET sort_order = ? WHERE slug = ?', args: [aOrder, b.slug] });
+}
+
+// Descuenta stock tras un pago. Los productos con stock -1 (ilimitado) no se tocan.
+export async function decrementStock(items: Array<{ slug: string; qty: number }>): Promise<void> {
+  await ensureSeed();
+  for (const it of items) {
+    const qty = Math.max(1, Number(it.qty) || 1);
+    await db.execute({
+      sql: 'UPDATE products SET stock = CASE WHEN stock < 0 THEN stock ELSE MAX(stock - ?, 0) END WHERE slug = ?',
+      args: [qty, it.slug],
+    });
+  }
 }

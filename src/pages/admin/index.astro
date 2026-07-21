@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { isVerifiedAdmin } from '../../lib/admin';
 import { getAllProductsAdmin } from '../../lib/catalog';
+import { formatPrice } from '../../lib/products';
 import { db, ensureSchema } from '../../lib/db';
 
 const user = Astro.locals.user;
@@ -10,31 +11,62 @@ if (!isVerifiedAdmin(user)) return Astro.redirect('/');
 
 const products = await getAllProductsAdmin();
 await ensureSchema();
-const res = await db.execute(
-  "SELECT COUNT(*) AS n, COALESCE(SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END), 0) AS paid FROM orders",
-);
-const totalOrders = Number(res.rows[0].n);
-const paidOrders = Number(res.rows[0].paid);
+const res = await db.execute('SELECT amount_total, status, items_json, created_at FROM orders');
+
+const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+const paidStates = new Set(['paid', 'fulfilled']);
+let total = 0;
+let pagados = 0;
+let porEnviar = 0;
+let ingresos = 0;
+let ingresosMes = 0;
+const tally: Record<string, number> = {};
+
+for (const r of res.rows) {
+  total++;
+  const status = String(r.status);
+  const amount = Number(r.amount_total);
+  const created = String(r.created_at);
+  if (paidStates.has(status)) {
+    pagados++;
+    ingresos += amount;
+    if (created.slice(0, 7) === month) ingresosMes += amount;
+    try {
+      for (const it of JSON.parse(String(r.items_json)) as Array<{ slug: string; qty: number }>) {
+        tally[it.slug] = (tally[it.slug] ?? 0) + Number(it.qty);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  if (status === 'paid') porEnviar++;
+}
+
+const topSlug = Object.entries(tally).sort((a, b) => b[1] - a[1])[0]?.[0];
+const topProduct = topSlug ? products.find((p) => p.slug === topSlug)?.name ?? topSlug : '—';
 
 const cards = [
-  { label: 'Productos', value: products.length, href: '/admin/productos' },
-  { label: 'Pedidos', value: totalOrders, href: '/admin/pedidos' },
-  { label: 'Pedidos pagados', value: paidOrders, href: '/admin/pedidos' },
+  { label: 'Ingresos (este mes)', value: formatPrice(ingresosMes) },
+  { label: 'Ingresos (total)', value: formatPrice(ingresos) },
+  { label: 'Pedidos pagados', value: String(pagados) },
+  { label: 'Pendientes de enviar', value: String(porEnviar) },
+  { label: 'Producto más vendido', value: topProduct },
+  { label: 'Productos en catálogo', value: String(products.length) },
 ];
 ---
 
 <Layout title="Admin">
   <section class="mx-auto max-w-5xl px-5 py-12">
     <h1 class="font-serif text-4xl font-semibold text-tierra">Panel de administración</h1>
-    <p class="mt-2 text-tierra/70">Gestiona el catálogo, los pedidos y los textos de la web.</p>
+    <p class="mt-2 text-tierra/70">Resumen de la tienda y accesos de gestión.</p>
 
-    <div class="mt-8 grid gap-5 sm:grid-cols-3">
+    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {
         cards.map((c) => (
-          <a href={c.href} class="rounded-organic border border-avena/50 bg-white/70 p-6 shadow-suave transition hover:border-miel">
+          <div class="rounded-organic border border-avena/50 bg-white/70 p-6 shadow-suave">
             <p class="text-sm font-semibold uppercase tracking-wide text-tierra/60">{c.label}</p>
-            <p class="mt-2 font-serif text-4xl font-semibold text-bosque">{c.value}</p>
-          </a>
+            <p class="mt-2 font-serif text-3xl font-semibold text-bosque">{c.value}</p>
+          </div>
         ))
       }
     </div>
@@ -42,7 +74,7 @@ const cards = [
     <div class="mt-8 flex flex-wrap gap-3">
       <a href="/admin/productos" class="rounded-full bg-bosque px-6 py-3 font-semibold text-crema hover:bg-musgo">Gestionar productos</a>
       <a href="/admin/pedidos" class="rounded-full border border-bosque/30 px-6 py-3 font-semibold text-bosque hover:bg-bosque/10">Ver pedidos</a>
-      <a href="/admin/textos" class="rounded-full border border-bosque/30 px-6 py-3 font-semibold text-bosque hover:bg-bosque/10">Editar textos</a>
+      <a href="/admin/textos" class="rounded-full border border-bosque/30 px-6 py-3 font-semibold text-bosque hover:bg-bosque/10">Editar contenido</a>
     </div>
   </section>
 </Layout>

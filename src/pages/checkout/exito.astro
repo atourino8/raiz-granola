@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getStripe, stripeConfigured } from '../../lib/stripe';
-import { db, ensureSchema } from '../../lib/db';
+import { markOrderPaid } from '../../lib/orders';
 
 const sessionId = Astro.url.searchParams.get('session_id');
 let paid = false;
@@ -14,11 +14,7 @@ if (sessionId && stripeConfigured) {
     paid = session.payment_status === 'paid';
     email = session.customer_details?.email ?? '';
     if (paid) {
-      await ensureSchema();
-      await db.execute({
-        sql: `UPDATE orders SET status = 'paid' WHERE stripe_session_id = ?`,
-        args: [sessionId],
-      });
+      await markOrderPaid(sessionId, email || null);
     }
   } catch (e) {
     console.error('[exito]', e);
