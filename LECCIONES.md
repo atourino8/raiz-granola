@@ -502,6 +502,54 @@ PYEOF
 
 Verificación byte a byte tras la escritura. Sin excusas.
 
+## PARTE 9 · TIENDAS ONLINE / E-COMMERCE (Raíz Granola, jul 2026)
+
+Stack Tier 2 con carrito, pagos y panel editable. Lo que funcionó y las trampas concretas que costaron tiempo.
+
+### 9.1 Stack que funcionó (tienda Astro SSR)
+
+- **Astro en modo `output: 'server'`** con adapter **`@astrojs/vercel`** (NO `@astrojs/node` si despliegas en Vercel).
+- **Tailwind v4 vía `@tailwindcss/vite`**, config CSS-first con `@theme` en `global.css`. El viejo `@astrojs/tailwind` está deprecado y peta con "Cannot read properties of undefined (reading 'postcss')".
+- **libSQL (`@libsql/client`)**: `file:./data/raiz.db` en local, **Turso** en prod.
+- **Auth propia**: scrypt (node:crypto) + cookies de sesión httpOnly, secure en prod, `__Host-` prefix en prod, expiración configurable (nunca infinita).
+- **Stripe Checkout** (webhook con verificación de firma, idempotente).
+- **nanostores + persistent** para el carrito (localStorage).
+- **Resend** (REST API) para verificación de email, reset y avisos de envío.
+- **Vercel Blob** para subida de imágenes desde el panel.
+
+### 9.2 Trampas de despliegue (todas reales, todas costaron tiempo)
+
+1. **libSQL `SQLITE_CANTOPEN (14)`**: el directorio de la DB no existía. Solución: `mkdirSync` del dir antes de abrir (envuelto en try/catch).
+2. **Turso "BLOCKED: SQL write operations are forbidden"**: el token era **read-only**. Hay que generar un token **read-write**. Diagnóstico correcto solo mirando los Runtime Logs, no adivinando.
+3. **CSP rompe HMR en dev**: aplica la CSP **solo en producción** (`import.meta.env.PROD`). Además, con CSP los scripts inline de Astro se bloquean → pon `assetsInlineLimit: 0` para que Astro los emita como archivos externos.
+4. **Límite de body en Vercel (~4.5 MB)**: subir imágenes grandes devuelve un HTML de error ("Request Entity Too Large"), no JSON → el cliente peta con "Unexpected token 'R'... is not valid JSON". Solución doble: (a) **redimensionar la imagen en el cliente** antes de subir (canvas, máx ~1600px, JPEG 0.85); (b) **nunca asumir que la respuesta es JSON**: lee `text()` y prueba `JSON.parse` con fallback.
+
+### 9.3 Vercel Blob con OIDC (la lección estrella del día)
+
+Vercel Blob pasó a **OIDC por defecto** (2026). Implicaciones que hay que tener claras SIEMPRE:
+
+- Con OIDC **NO existe un `BLOB_READ_WRITE_TOKEN` estático** en el entorno. La función se autentica con `VERCEL_OIDC_TOKEN` (temporal, auto-rotado) + `BLOB_STORE_ID`, y el SDK los usa **solo**.
+- **NO exijas el token en el código.** Si haces `if (!token) return error`, bloqueas la subida en Vercel aunque todo esté bien configurado. Llama a `put()` **sin** pasar `token` y deja que el SDK resuelva por OIDC. Pasa `token` únicamente como fallback opcional para desarrollo local.
+- **El store debe ser PÚBLICO** para imágenes de tienda (producto, logo, favicon). Un store **privado** rechaza `access: 'public'` con "Cannot use public access on a private store", y sus URLs caducan y requieren auth → inservibles para `<img>` y malas para SEO. El tipo de acceso se fija **al crear el store** y no se cambia después; ahora Vercel crea **privado por defecto**, ojo. Si te equivocaste: borra y recrea el store como **Public**.
+- Tras conectar/crear el store hay que **redeploy** para que el deployment lo tome ("Redeploy each project before deployments pick up the new store").
+
+### 9.4 Seguridad y datos (e-commerce)
+
+- **Recalcular precios en el servidor desde la DB** en el checkout. Nunca confiar en el precio/cantidad que manda el cliente. Clampar cantidades al stock; omitir productos agotados.
+- **Stock**: convención `-1` = ilimitado, `0` = agotado (no vendible), `>0` = tope de unidades. Decrementar solo al confirmar pago (webhook idempotente).
+- **RGPD/LOPD**: páginas de privacidad, cookies, aviso legal y términos + banner de cookies. Fuentes **self-hosted** (Fontsource), no Google Fonts desde CDN.
+- **Rate limiting** en login/registro/reset (tabla en DB) contra fuerza bruta.
+
+### 9.5 Detalles de UX que dieron guerra
+
+- **Banner de cookies invisible**: (a) hazlo **visible por defecto** y que el JS solo lo oculte (si dependes de JS para mostrarlo y la CSP bloquea el script, no aparece nunca); (b) **Brave** oculta banners de cookies con su bloqueador propio — no es un bug tuyo, verifícalo en Chrome antes de tocar código.
+- **Lag del carrito lateral (drawer)**: `backdrop-blur` es caro y el timing con `requestAnimationFrame` fallaba. Solución: quitar el blur y forzar un reflow (`void panel.offsetWidth`) antes de quitar la clase de transición.
+
+### 9.6 Panel editable sin tocar código (CMS ligero propio)
+
+- Tabla `settings` clave-valor en la DB + defaults en código. Permite editar copy, textos, nombre de marca, emoji, favicon, imágenes y **orden de bloques** del home sin redeploy.
+- Imágenes editables por **URL y por subida de archivo** (mismo campo). Reutilizable como patrón para cualquier tienda del cliente.
+
 ---
 
 *Fin del documento. Este archivo se actualiza con cada proyecto.*
