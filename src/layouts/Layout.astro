@@ -11,7 +11,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CartScripts from '../components/CartScripts.astro';
 import CookieBanner from '../components/CookieBanner.astro';
-import { getSetting } from '../lib/settings';
+import { getAllSettings } from '../lib/settings';
 
 interface Props {
   title?: string;
@@ -28,7 +28,11 @@ const {
 
 const user = Astro.locals.user;
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || Astro.url.origin;
-const brand = await getSetting('brand_name');
+const cfg = await getAllSettings();
+const brand = cfg.brand_name;
+const favicon = cfg.brand_favicon
+  ? cfg.brand_favicon
+  : `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${cfg.brand_emoji}</text></svg>`;
 
 // Título de pestaña: "<pagina> — <marca>", o solo la marca + lema en la home.
 const fullTitle = title
@@ -56,7 +60,7 @@ const storeSchema = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{fullTitle}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
+    <link rel="icon" href={favicon} />
     <!-- Open Graph -->
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
