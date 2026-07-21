@@ -2,8 +2,8 @@
 // Mini-carrito lateral: se abre al añadir un producto o al pulsar "Cesta".
 ---
 <div id="cart-drawer" class="fixed inset-0 z-[60] hidden">
-  <div data-overlay class="absolute inset-0 bg-tierra/40 backdrop-blur-sm"></div>
-  <aside class="absolute right-0 top-0 flex h-full w-full max-w-sm translate-x-full flex-col bg-crema shadow-suave transition-transform duration-300" data-panel>
+  <div data-overlay class="absolute inset-0 bg-tierra/40"></div>
+  <aside class="absolute right-0 top-0 flex h-full w-full max-w-sm translate-x-full flex-col bg-crema shadow-suave transition-transform duration-300 will-change-transform" data-panel>
     <div class="flex items-center justify-between border-b border-avena/50 px-5 py-4">
       <h2 class="font-serif text-xl font-semibold text-tierra">Tu cesta</h2>
       <button data-close class="rounded-full p-1 text-tierra/60 hover:bg-avena/40" aria-label="Cerrar">✕</button>
@@ -48,7 +48,10 @@
 
     const open = () => {
       drawer.classList.remove('hidden');
-      requestAnimationFrame(() => panel.classList.remove('translate-x-full'));
+      // Forzamos un reflow para que la transición arranque desde translate-x-full
+      // (evita el salto/lag al abrir).
+      void panel.offsetWidth;
+      panel.classList.remove('translate-x-full');
     };
     const close = () => {
       panel.classList.add('translate-x-full');
