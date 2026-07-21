@@ -50,6 +50,11 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
 
   const sortOrder = parseInt(String(data.get('sortOrder') ?? '99'), 10);
 
+  // Stock: vacío o -1 = ilimitado; 0 = agotado; >0 = unidades disponibles.
+  const stockRaw = clean(data.get('stock'));
+  const stockParsed = stockRaw === '' ? -1 : parseInt(stockRaw, 10);
+  const stock = Number.isFinite(stockParsed) ? stockParsed : -1;
+
   await upsertProduct({
     slug,
     name,
@@ -65,6 +70,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     featured: data.get('featured') != null,
     active: data.get('active') != null,
     sortOrder: Number.isFinite(sortOrder) ? sortOrder : 99,
+    stock,
   });
 
   return redirect('/admin/productos?saved=1');
