@@ -5,6 +5,10 @@ import { db, ensureSchema } from './db';
 // (defaultSettings + settingLabels) y usarlo en la página correspondiente.
 
 export const defaultSettings: Record<string, string> = {
+  // Marca
+  brand_name: 'Raíz Granola',
+  brand_emoji: '🌾',
+
   // Home · Hero
   home_hero_badge: '🌾 Obrador artesanal · Lotes pequeños',
   home_hero_title_1: 'Granola horneada',
@@ -67,6 +71,8 @@ export const defaultSettings: Record<string, string> = {
 };
 
 export const settingLabels: Record<string, string> = {
+  brand_name: 'Nombre de la marca',
+  brand_emoji: 'Emoji/icono de la marca',
   home_hero_badge: 'Etiqueta superior del hero',
   home_hero_title_1: 'Titular (línea 1)',
   home_hero_title_2: 'Titular (línea 2, en color)',
@@ -110,6 +116,7 @@ export const settingLabels: Record<string, string> = {
 
 // Agrupación para el panel /admin/textos (mejor UX).
 export const settingGroups: Array<{ title: string; keys: string[] }> = [
+  { title: 'Marca', keys: ['brand_name', 'brand_emoji'] },
   {
     title: 'Home · Portada',
     keys: [

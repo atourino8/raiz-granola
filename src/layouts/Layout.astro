@@ -11,6 +11,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CartScripts from '../components/CartScripts.astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import { getSetting } from '../lib/settings';
 
 interface Props {
   title?: string;
@@ -20,19 +21,25 @@ interface Props {
 }
 
 const {
-  title = 'Raíz Granola — Granola artesanal horneada a fuego lento',
+  title,
   description = 'Granola artesanal elaborada en pequeños lotes con ingredientes ecológicos, sin azúcares refinados. Del horno a tu mesa.',
   jsonLd,
 } = Astro.props;
 
 const user = Astro.locals.user;
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || Astro.url.origin;
+const brand = await getSetting('brand_name');
+
+// Título de pestaña: "<pagina> — <marca>", o solo la marca + lema en la home.
+const fullTitle = title
+  ? `${title} — ${brand}`
+  : `${brand} — Granola artesanal horneada a fuego lento`;
 
 // JSON-LD base: Store / negocio local (lección 1.2 del playbook → mejora indexación)
 const storeSchema = {
   '@context': 'https://schema.org',
   '@type': 'Store',
-  name: 'Raíz Granola',
+  name: brand,
   description,
   url: siteUrl,
   currenciesAccepted: 'EUR',
@@ -48,10 +55,10 @@ const storeSchema = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <title>{title}</title>
+    <title>{fullTitle}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
     <!-- Open Graph -->
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />

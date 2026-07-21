@@ -1,5 +1,6 @@
 ---
 import { isVerifiedAdmin } from '../lib/admin';
+import { getSetting } from '../lib/settings';
 
 interface Props {
   user: { id: number; name: string; email: string } | null;
@@ -7,6 +8,12 @@ interface Props {
 const { user } = Astro.props;
 const admin = isVerifiedAdmin(user);
 const path = Astro.url.pathname;
+
+const brand = await getSetting('brand_name');
+const brandEmoji = await getSetting('brand_emoji');
+const [brandFirst, ...brandRest] = brand.split(' ');
+const brandSecond = brandRest.join(' ');
+
 const links = [
   { href: '/tienda', label: 'Tienda' },
   { href: '/nosotros', label: 'Nuestra historia' },
@@ -16,8 +23,8 @@ const links = [
 <header class="sticky top-0 z-40 border-b border-avena/40 bg-crema/85 backdrop-blur-md">
   <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
     <a href="/" class="flex items-center gap-2 font-serif text-xl font-semibold text-bosque">
-      <span class="text-2xl">🌾</span>
-      <span>Raíz<span class="text-miel">Granola</span></span>
+      <span class="text-2xl">{brandEmoji}</span>
+      <span>{brandFirst}{brandSecond && <span class="text-miel"> {brandSecond}</span>}</span>
     </a>
 
     <ul class="hidden items-center gap-7 text-sm font-semibold md:flex">
